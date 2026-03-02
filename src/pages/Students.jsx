@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
-import { Plus, Trash2, Search, Users } from 'lucide-react'
+import { Plus, Trash2, Search, Users, Upload, FileText } from 'lucide-react'
 
 export default function StudentsPage() {
-    const { students, deleteStudent, openModal, addToast } = useApp()
+    const { students, deleteStudent, openModal, addToast, importStudents } = useApp()
     const [search, setSearch] = useState('')
     const [filterClass, setFilterClass] = useState('All')
     const [filterFee, setFilterFee] = useState('All')
+    const fileInputRef = useRef(null)
 
     const classes = ['All', ...new Set(students.map(s => s.class))]
     const filtered = students.filter(s =>
@@ -17,6 +18,45 @@ export default function StudentsPage() {
 
     const feeColor = { Paid: 'green', Pending: 'amber', Overdue: 'red' }
 
+    const handleCsvUpload = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            const text = event.target.result
+            const lines = text.split('\n')
+            const result = []
+
+            // Expected format: name,class,roll,gender,phone,email,password,avg,attendance,fee
+            lines.slice(1).forEach(line => {
+                if (!line.trim()) return
+                const parts = line.split(',')
+                if (parts.length >= 7) {
+                    result.push({
+                        name: parts[0]?.trim(),
+                        class: parts[1]?.trim(),
+                        roll: parts[2]?.trim(),
+                        gender: parts[3]?.trim(),
+                        phone: parts[4]?.trim(),
+                        email: parts[5]?.trim(),
+                        password: parts[6]?.trim(),
+                        avg: parseInt(parts[7]) || 0,
+                        attendance: parseInt(parts[8]) || 0,
+                        fee: parts[9]?.trim() || 'Paid'
+                    })
+                }
+            })
+
+            if (result.length > 0) {
+                importStudents(result)
+            } else {
+                addToast('Invalid CSV format. Expected: name,class,roll,gender,phone,email,password...', 'error')
+            }
+        }
+        reader.readAsText(file)
+    }
+
     return (
         <div className="dashboard-body">
             {/* Header */}
@@ -25,9 +65,15 @@ export default function StudentsPage() {
                     <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 22, fontWeight: 800, color: '#0A2463' }}>Students</h2>
                     <p style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>{students.length} enrolled students across all classes</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => openModal('addStudent')}>
-                    <Plus size={14} /> Add Student
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <input type="file" ref={fileInputRef} hidden accept=".csv" onChange={handleCsvUpload} />
+                    <button className="btn btn-outline" onClick={() => fileInputRef.current.click()}>
+                        <Upload size={14} /> Import CSV
+                    </button>
+                    <button className="btn btn-primary" onClick={() => openModal('addStudent')}>
+                        <Plus size={14} /> Add Student
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -84,20 +130,19 @@ export default function StudentsPage() {
                 <div className="table-wrap">
                     <table>
                         <thead><tr>
-                            <th>Name</th><th>Class</th><th>Roll</th><th>Gender</th>
-                            <th>Phone</th><th>Avg %</th><th>Attendance</th><th>Fee</th><th>Actions</th>
+                            <th>Name</th><th>Class</th><th>Roll</th><th>Email/Username</th>
+                            <th>Avg %</th><th>Attendance</th><th>Fee</th><th>Actions</th>
                         </tr></thead>
                         <tbody>
                             {filtered.length === 0 && (
-                                <tr><td colSpan={9} style={{ textAlign: 'center', color: '#94A3B8', padding: 32 }}>No students found.</td></tr>
+                                <tr><td colSpan={8} style={{ textAlign: 'center', color: '#94A3B8', padding: 32 }}>No students found.</td></tr>
                             )}
                             {filtered.map(s => (
                                 <tr key={s.id}>
                                     <td><div style={{ fontWeight: 700 }}>{s.name}</div></td>
                                     <td><span className="chip chip-blue">{s.class}</span></td>
                                     <td style={{ fontWeight: 600 }}>{s.roll}</td>
-                                    <td>{s.gender}</td>
-                                    <td style={{ fontSize: 12, color: '#64748B' }}>{s.phone || '—'}</td>
+                                    <td style={{ fontSize: 12, color: '#1E50E2', fontWeight: 600 }}>{s.email || 'N/A'}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <div className="progress-bar" style={{ width: 50 }}>
@@ -118,7 +163,7 @@ export default function StudentsPage() {
                                     <td>
                                         <div style={{ display: 'flex', gap: 6 }}>
                                             <button className="btn btn-ghost btn-sm"
-                                                onClick={() => addToast(`Viewing ${s.name}'s profile…`, 'info')}>View</button>
+                                                onClick={() => addToast(`Password: ${s.password}`, 'info')}>Creds</button>
                                             <button className="btn btn-ghost btn-sm" style={{ color: '#EF4444' }}
                                                 onClick={() => { deleteStudent(s.id); addToast(`${s.name} removed.`, 'warning') }}>
                                                 <Trash2 size={12} />

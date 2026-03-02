@@ -2,14 +2,26 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AppContext = createContext()
 
+// Shared key for cross-app "database" simulation
+const STUDENT_DB_KEY = 'amal_student_db'
+
 export function AppProvider({ children }) {
     // --- Existing State ---
-    const [students, setStudents] = useState([
-        { id: 1, name: 'Kavya Nair', class: 'XII-A', roll: '04', fee: 'Paid', status: 'Active' },
-        { id: 2, name: 'Rahul Verma', class: 'XII-A', roll: '12', fee: 'Pending', status: 'Active' },
-        { id: 3, name: 'Aditi Rao', class: 'XI-B', roll: '07', fee: 'Overdue', status: 'Active' },
-        { id: 4, name: 'Sanjay Kumar', class: 'X-A', roll: '22', fee: 'Paid', status: 'Inactive' },
-    ])
+    const [students, setStudents] = useState(() => {
+        const saved = localStorage.getItem(STUDENT_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, name: 'Kavya Nair', class: 'XII-A', roll: '04', gender: 'Female', phone: '9876543210', avg: 94, attendance: 98, fee: 'Paid', status: 'Active', email: 'kavya@student.ahss.edu', password: 'password123' },
+            { id: 2, name: 'Rahul Verma', class: 'XII-A', roll: '12', gender: 'Male', phone: '9876543211', avg: 82, attendance: 85, fee: 'Pending', status: 'Active', email: 'rahul@student.ahss.edu', password: 'password123' },
+            { id: 3, name: 'Aditi Rao', class: 'XI-B', roll: '07', gender: 'Female', phone: '9876543212', avg: 75, attendance: 90, fee: 'Overdue', status: 'Active', email: 'aditi@student.ahss.edu', password: 'password123' },
+            { id: 4, name: 'Sanjay Kumar', class: 'X-A', roll: '22', gender: 'Male', phone: '9876543213', avg: 68, attendance: 72, fee: 'Paid', status: 'Inactive', email: 'sanjay@student.ahss.edu', password: 'password123' },
+        ]
+    })
+
+    // Persist students to shared "DB" whenever updated
+    useEffect(() => {
+        localStorage.setItem(STUDENT_DB_KEY, JSON.stringify(students))
+    }, [students])
 
     const [events, setEvents] = useState([
         { id: 1, day: '08', month: 'Mar', year: 2026, name: 'Annual Sports Meet', desc: 'Main Ground · 9:00 AM', type: 'Sports' },
@@ -46,7 +58,6 @@ export function AppProvider({ children }) {
 
     const [gradebook, setGradebook] = useState({})
 
-    // --- NEW Advanced State ---
     const [news, setNews] = useState([
         { id: 1, title: 'School Reopens after Holidays', date: 'Mar 01, 2026', type: 'General', content: 'We welcome all students back for the new term! Please ensure uniforms are strictly followed.', urgent: true },
         { id: 2, title: 'Volleyball District Champions!', date: 'Feb 28, 2026', type: 'Sports', content: 'Our senior boys team has clinced the district trophy. Celebration on Monday.', image: true },
@@ -65,13 +76,11 @@ export function AppProvider({ children }) {
         studentAppBroadcast: 'Stay safe and keep learning!'
     })
 
-    // --- UI State ---
     const [activePage, setActivePage] = useState('dashboard')
     const [toasts, setToasts] = useState([])
     const [modal, setModal] = useState(null)
     const [chartPeriod, setChartPeriod] = useState('Monthly')
 
-    // --- System Helpers ---
     const addToast = (msg, type = 'success') => {
         const id = Date.now()
         setToasts(t => [...t, { id, msg, type }])
@@ -81,9 +90,21 @@ export function AppProvider({ children }) {
     const openModal = (type, data = null) => setModal({ type, data })
     const closeModal = () => setModal(null)
 
-    // --- Data Handlers ---
     const addStudent = (s) => setStudents(prev => [...prev, { ...s, id: Date.now(), status: 'Active' }])
     const deleteStudent = (id) => setStudents(prev => prev.filter(s => s.id !== id))
+
+    // CSV Import Handler
+    const importStudents = (list) => {
+        setStudents(list.map((s, i) => ({
+            ...s,
+            id: Date.now() + i,
+            status: 'Active',
+            avg: s.avg || 0,
+            attendance: s.attendance || 0,
+            fee: s.fee || 'Paid'
+        })))
+        addToast(`${list.length} students imported successfully.`, 'success')
+    }
 
     const addEvent = (e) => setEvents(prev => [...prev, { ...e, id: Date.now() }])
     const deleteEvent = (id) => setEvents(prev => prev.filter(e => e.id !== id))
@@ -105,14 +126,13 @@ export function AppProvider({ children }) {
 
     const saveGrades = (cls, grades) => setGradebook(prev => ({ ...prev, [cls]: grades }))
 
-    // --- NEWS & LIVE CLASS HANDLERS ---
     const addNews = (n) => setNews(prev => [{ ...n, id: Date.now(), date: new Date().toLocaleDateString() }, ...prev])
     const updateLiveClass = (id, status) => setLiveClasses(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     const broadcastMsg = (msg) => setAppConfig(prev => ({ ...prev, studentAppBroadcast: msg }))
 
     return (
         <AppContext.Provider value={{
-            students, addStudent, deleteStudent,
+            students, addStudent, deleteStudent, importStudents,
             events, addEvent, deleteEvent,
             appointments, addAppointment, updateAppointment,
             inventory, updateInventory,
