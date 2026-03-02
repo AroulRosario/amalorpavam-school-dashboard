@@ -1,14 +1,13 @@
-import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import {
-    LayoutDashboard, Users, BookOpen, Calendar, Bell, Settings,
-    CreditCard, Layers, BarChart2, Award, Utensils, Package,
-    MessageSquare, GraduationCap, UserCog, LogOut, ChevronRight
+    LayoutDashboard, Users, BookOpen, Calendar, Settings,
+    CreditCard, Layers, BarChart2, Utensils, Package,
+    UserCog, LogOut, ChevronRight, Globe
 } from 'lucide-react'
 
 const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'students', icon: GraduationCap, label: 'Students', badge: null },
+    { id: 'students', icon: Users, label: 'Students' },
     { id: 'fees', icon: CreditCard, label: 'Fee Management', badge: '3' },
     { id: 'content', icon: Layers, label: 'Content Portal' },
     { id: 'events', icon: Calendar, label: 'Events & Calendar' },
@@ -16,8 +15,9 @@ const navItems = [
     { id: 'canteen', icon: Utensils, label: 'Canteen' },
     { id: 'inventory', icon: Package, label: 'Inventory Store' },
     { id: 'usermgmt', icon: UserCog, label: 'User Management' },
-    { id: 'student-view', icon: Users, label: 'Student View 🎓' },
-    { id: 'teacher-view', icon: BookOpen, label: 'Teacher View 📋' },
+    { id: 'mobile-home', icon: Globe, label: 'Mobile Student Portal 📱' },
+    { id: 'student-view', icon: Users, label: 'Student Dashboard 🎓' },
+    { id: 'teacher-view', icon: BookOpen, label: 'Teacher Dashboard 📋' },
 ]
 
 export default function Sidebar() {

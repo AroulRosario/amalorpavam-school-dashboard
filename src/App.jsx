@@ -14,6 +14,12 @@ import UserMgmtPage from './pages/UserManagement'
 import StudentView from './pages/StudentView'
 import TeacherView from './pages/TeacherView'
 
+// Mobile Pages
+import MobileHome from './pages/MobileHome'
+import MobileLearning from './pages/MobileLearning'
+import MobileSchedule from './pages/MobileSchedule'
+import MobileProfile from './pages/MobileProfile'
+
 // Modals
 import {
     AddStudentModal, AddEventModal, UploadContentModal, BulkCSVModal,
@@ -29,6 +35,9 @@ import {
     UserCog, Globe, Star, Shield, ChevronRight, Plus, Send,
     Activity, CheckSquare, Upload, Edit3
 } from 'lucide-react'
+
+// Components
+import BottomNav from './components/BottomNav'
 
 // ── Tiny bar chart component ────────────────────────────────
 const monthlyData = [
@@ -296,24 +305,24 @@ function AdminDashboard() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                     {/* Student preview card */}
                     <div style={{ background: 'linear-gradient(135deg,#1034A6,#1E50E2)', borderRadius: 20, padding: 24, color: 'white', cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'all .2s' }}
-                        onClick={() => setActivePage('student-view')}
+                        onClick={() => setActivePage('mobile-home')}
                         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseLeave={e => e.currentTarget.style.transform = ''}>
                         <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 16 }}>
                             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,.2)', border: '2px solid rgba(255,255,255,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18 }}>KN</div>
                             <div>
-                                <div style={{ fontSize: 11, opacity: .7 }}>Student Dashboard</div>
+                                <div style={{ fontSize: 11, opacity: .7 }}>Student Mobile Portal</div>
                                 <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 18, fontWeight: 800 }}>Kavya Nair</div>
                                 <div style={{ fontSize: 12, opacity: .75 }}>Class XII-A · Rank #1</div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: 10 }}>
-                            {['📋 Overview', '📚 Learning', '🚌 GPS', '💬 Chat'].map(b => (
+                            {['📱 Mobile UI', '📚 Learning', '🗓️ Schedule', '👤 Profile'].map(b => (
                                 <div key={b} style={{ background: 'rgba(255,255,255,.15)', borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 600 }}>{b}</div>
                             ))}
                         </div>
                         <div style={{ position: 'absolute', bottom: 20, right: 20, background: 'rgba(255,255,255,.2)', borderRadius: 10, padding: '8px 16px', fontSize: 12, fontWeight: 700 }}>
-                            Open Dashboard →
+                            Open Mobile Portal →
                         </div>
                     </div>
                     {/* Teacher preview card */}
@@ -377,11 +386,18 @@ const pageTitles = {
     usermgmt: 'User Management',
     'student-view': 'Student View — Kavya Nair',
     'teacher-view': 'Teacher View — Ms. Anitha Kumar',
+    'mobile-home': 'Welcome, Kavya',
+    'mobile-learning': 'Learning Center',
+    'mobile-schedule': 'Today\'s Schedule',
+    'mobile-profile': 'Profile',
 }
 
 // ── App Shell ────────────────────────────────────────────────
 export default function App() {
     const { activePage, setActivePage, openModal, addToast } = useApp()
+
+    const isMobileView = activePage.startsWith('mobile-')
+
     const pageContent = {
         dashboard: <AdminDashboard />,
         students: <StudentsPage />,
@@ -394,6 +410,21 @@ export default function App() {
         usermgmt: <UserMgmtPage />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,
+        'mobile-home': <MobileHome />,
+        'mobile-learning': <MobileLearning />,
+        'mobile-schedule': <MobileSchedule />,
+        'mobile-profile': <MobileProfile />,
+    }
+
+    if (isMobileView) {
+        return (
+            <div className="mobile-shell">
+                {pageContent[activePage]}
+                <BottomNav />
+                <ModalDispatcher />
+                <Toast />
+            </div>
+        )
     }
 
     return (
