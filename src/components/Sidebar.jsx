@@ -2,12 +2,13 @@ import { useApp } from '../context/AppContext'
 import {
     LayoutDashboard, Users, BookOpen, Calendar, Settings,
     CreditCard, Layers, BarChart2, Utensils, Package,
-    UserCog, LogOut, ChevronRight, Globe
+    UserCog, LogOut, ChevronRight, Globe, Smartphone
 } from 'lucide-react'
 
 const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'students', icon: Users, label: 'Students' },
+    { id: 'studentAppMgr', icon: Smartphone, label: 'Student App Manager 📱' },
     { id: 'fees', icon: CreditCard, label: 'Fee Management', badge: '3' },
     { id: 'content', icon: Layers, label: 'Content Portal' },
     { id: 'events', icon: Calendar, label: 'Events & Calendar' },
@@ -15,7 +16,6 @@ const navItems = [
     { id: 'canteen', icon: Utensils, label: 'Canteen' },
     { id: 'inventory', icon: Package, label: 'Inventory Store' },
     { id: 'usermgmt', icon: UserCog, label: 'User Management' },
-    { id: 'mobile-home', icon: Globe, label: 'Mobile Student Portal 📱' },
     { id: 'student-view', icon: Users, label: 'Student Dashboard 🎓' },
     { id: 'teacher-view', icon: BookOpen, label: 'Teacher Dashboard 📋' },
 ]

@@ -13,6 +13,7 @@ import AnalyticsPage from './pages/Analytics'
 import UserMgmtPage from './pages/UserManagement'
 import StudentView from './pages/StudentView'
 import TeacherView from './pages/TeacherView'
+import StudentAppMgr from './pages/StudentAppManager'
 
 // Mobile Pages
 import MobileHome from './pages/MobileHome'
@@ -33,7 +34,7 @@ import {
     TrendingUp, TrendingDown, Users, GraduationCap, CreditCard,
     Layers, Award, Package, Utensils, BarChart2, Database,
     UserCog, Globe, Star, Shield, ChevronRight, Plus, Send,
-    Activity, CheckSquare, Upload, Edit3
+    Activity, CheckSquare, Upload, Edit3, Smartphone
 } from 'lucide-react'
 
 // Components
@@ -87,6 +88,7 @@ function Donut({ segments }) {
 
 // ── Admin Dashboard ─────────────────────────────────────────
 const moduleCards = [
+    { icon: Smartphone, color: '#6366F1', bg: '#EEF2FF', title: 'Student App Manager', desc: 'Control News Feed & Live Classes', tag: 'Advanced', modal: null, page: 'studentAppMgr' },
     { icon: Bell, color: '#1E50E2', bg: '#E8EFFD', title: 'Circular Distribution', desc: 'Send & track school circulars', tag: '3 New', modal: null, page: null },
     { icon: Award, color: '#F59E0B', bg: '#FEF3C7', title: 'Rank Card Management', desc: 'Generate & publish rank cards', tag: 'Active', modal: null, page: 'analytics' },
     { icon: CreditCard, color: '#EF4444', bg: '#FEE2E2', title: 'Fee Management', desc: '₹2.4L outstanding · Send reminders', tag: '12 Due', modal: 'feeReminder', page: 'fees' },
@@ -97,7 +99,6 @@ const moduleCards = [
     { icon: Package, color: '#0EA5E9', bg: '#E0F2FE', title: 'Inventory Store', desc: 'Uniforms · Notebooks · Books', tag: 'Manage', modal: null, page: 'inventory' },
     { icon: BarChart2, color: '#1E50E2', bg: '#E8EFFD', title: 'Performance Analytics', desc: 'Class-wise & subject trending', tag: 'Live', modal: null, page: 'analytics' },
     { icon: UserCog, color: '#6366F1', bg: '#EEF2FF', title: 'Principal Appointments', desc: 'Book & manage meeting slots', tag: '4 Pending', modal: 'addAppointment', page: 'events' },
-    { icon: Globe, color: '#14B8A6', bg: '#CCFBF1', title: 'Educational Reels', desc: 'Short-form learning videos', tag: 'New', modal: null, page: 'content' },
     { icon: Database, color: '#64748B', bg: '#F1F5F9', title: 'Bulk CSV Upload', desc: 'Import Students · Staff · Marks', tag: 'Import', modal: 'bulkCSV', page: null },
 ]
 
@@ -299,30 +300,30 @@ function AdminDashboard() {
                 <div className="section-header">
                     <div className="section-title"><span className="section-title-dot" style={{ background: '#10B981' }} />User Role Views</div>
                     <span style={{ fontSize: 12, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Activity size={13} color="#10B981" />Click a card to open the full dashboard
+                        <Activity size={13} color="#10B981" />Click a card to open the dashboard (Internal View)
                     </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                     {/* Student preview card */}
                     <div style={{ background: 'linear-gradient(135deg,#1034A6,#1E50E2)', borderRadius: 20, padding: 24, color: 'white', cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'all .2s' }}
-                        onClick={() => setActivePage('mobile-home')}
+                        onClick={() => setActivePage('student-view')}
                         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseLeave={e => e.currentTarget.style.transform = ''}>
                         <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 16 }}>
                             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,.2)', border: '2px solid rgba(255,255,255,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18 }}>KN</div>
                             <div>
-                                <div style={{ fontSize: 11, opacity: .7 }}>Student Mobile Portal</div>
+                                <div style={{ fontSize: 11, opacity: .7 }}>Internal Student Dashboard</div>
                                 <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 18, fontWeight: 800 }}>Kavya Nair</div>
                                 <div style={{ fontSize: 12, opacity: .75 }}>Class XII-A · Rank #1</div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: 10 }}>
-                            {['📱 Mobile UI', '📚 Learning', '🗓️ Schedule', '👤 Profile'].map(b => (
+                            {['📋 Overview', '📚 Learning', '🚌 GPS', '💬 Chat'].map(b => (
                                 <div key={b} style={{ background: 'rgba(255,255,255,.15)', borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 600 }}>{b}</div>
                             ))}
                         </div>
                         <div style={{ position: 'absolute', bottom: 20, right: 20, background: 'rgba(255,255,255,.2)', borderRadius: 10, padding: '8px 16px', fontSize: 12, fontWeight: 700 }}>
-                            Open Mobile Portal →
+                            Open Internal View →
                         </div>
                     </div>
                     {/* Teacher preview card */}
@@ -384,6 +385,7 @@ const pageTitles = {
     canteen: 'Canteen Management',
     inventory: 'Inventory Store',
     usermgmt: 'User Management',
+    studentAppMgr: 'Student App Manager',
     'student-view': 'Student View — Kavya Nair',
     'teacher-view': 'Teacher View — Ms. Anitha Kumar',
     'mobile-home': 'Welcome, Kavya',
@@ -408,6 +410,7 @@ export default function App() {
         canteen: <CanteenPage />,
         inventory: <InventoryPage />,
         usermgmt: <UserMgmtPage />,
+        studentAppMgr: <StudentAppMgr />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,
         'mobile-home': <MobileHome />,
