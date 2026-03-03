@@ -12,11 +12,35 @@ const APP_CONFIG_DB_KEY = 'amal_app_config_db'
 const EXAM_DB_KEY = 'amal_exam_db'
 const TIMETABLE_DB_KEY = 'amal_timetable_db'
 const TEACHER_PERMS_DB_KEY = 'amal_teacher_perms_db'
+const CIRCULARS_DB_KEY = 'amal_circulars_db'
+const ACHIEVEMENTS_DB_KEY = 'amal_achievements_db'
 
 // Default permission set for new teachers
 const DEFAULT_PERMS = { homework: true, markEntry: true, attendance: true, contentUpload: false, timetableView: true, studentPerformance: true }
 
 export function AppProvider({ children }) {
+    // ── Authentication ────────────────────────────
+    const [admin, setAdmin] = useState(() => {
+        const saved = localStorage.getItem('amal_admin_active')
+        return saved ? JSON.parse(saved) : null
+    })
+
+    const loginAdmin = (email, pass) => {
+        if (email === 'admin@amal.edu' && pass === 'admin123') {
+            const user = { name: 'Super Admin', email, role: 'Principal' }
+            setAdmin(user)
+            localStorage.setItem('amal_admin_active', JSON.stringify(user))
+            return true
+        }
+        return false
+    }
+
+    const logoutAdmin = () => {
+        setAdmin(null)
+        localStorage.removeItem('amal_admin_active')
+        setActivePage('dashboard')
+    }
+
     // ── Students ──────────────────────────────────
     const [students, setStudents] = useState(() => {
         const saved = localStorage.getItem(STUDENT_DB_KEY)
@@ -149,6 +173,28 @@ export function AppProvider({ children }) {
     })
     useEffect(() => { localStorage.setItem(LIVE_CLASSES_DB_KEY, JSON.stringify(liveClasses)) }, [liveClasses])
 
+    // ── Circulars ────────────────────────────────
+    const [circulars, setCirculars] = useState(() => {
+        const saved = localStorage.getItem(CIRCULARS_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, title: 'Annual Day Celebration', date: '2026-03-20', category: 'Event', content: 'Our 45th Annual Day will be held in the main auditorium.', target: 'All' },
+            { id: 2, title: 'Uniform Distribution', date: '2026-03-05', category: 'General', content: 'New uniforms will be distributed class-wise from Wednesday.', target: 'Students' },
+        ]
+    })
+    useEffect(() => { localStorage.setItem(CIRCULARS_DB_KEY, JSON.stringify(circulars)) }, [circulars])
+
+    // ── Achievements ──────────────────────────────
+    const [achievements, setAchievements] = useState(() => {
+        const saved = localStorage.getItem(ACHIEVEMENTS_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, studentName: 'Kavya Nair', award: 'National Math Olympiad Gold', date: '2026-02-15', desc: 'Ranked 1st nationwide in the senior category.' },
+            { id: 2, studentName: 'Rahul Verma', award: 'State Level Volleyball MVP', date: '2026-02-28', desc: 'Led the school team to championship victory.' },
+        ]
+    })
+    useEffect(() => { localStorage.setItem(ACHIEVEMENTS_DB_KEY, JSON.stringify(achievements)) }, [achievements])
+
     // ── App Config ───────────────────────────────
     const [appConfig, setAppConfig] = useState(() => {
         const saved = localStorage.getItem(APP_CONFIG_DB_KEY)
@@ -224,6 +270,12 @@ export function AppProvider({ children }) {
     const updateLiveClass = (id, status) => setLiveClasses(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     const broadcastMsg = (msg) => setAppConfig(prev => ({ ...prev, studentAppBroadcast: msg }))
 
+    // Circulars/Achievements Actions
+    const addCircular = (c) => setCirculars(prev => [{ ...c, id: Date.now() }, ...prev])
+    const deleteCircular = (id) => setCirculars(prev => prev.filter(c => c.id !== id))
+    const addAchievement = (a) => setAchievements(prev => [{ ...a, id: Date.now() }, ...prev])
+    const deleteAchievement = (id) => setAchievements(prev => prev.filter(a => a.id !== id))
+
     return (
         <AppContext.Provider value={{
             students, addStudent, deleteStudent, updateStudent, importStudents,
@@ -244,7 +296,10 @@ export function AppProvider({ children }) {
             activePage, setActivePage,
             toasts, addToast,
             modal, openModal, closeModal,
-            chartPeriod, setChartPeriod
+            chartPeriod, setChartPeriod,
+            admin, loginAdmin, logoutAdmin,
+            circulars, addCircular, deleteCircular,
+            achievements, addAchievement, deleteAchievement
         }}>
             {children}
         </AppContext.Provider>

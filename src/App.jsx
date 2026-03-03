@@ -10,7 +10,6 @@ import ContentPage from './pages/ContentPortal'
 import CanteenPage from './pages/Canteen'
 import InventoryPage from './pages/Inventory'
 import AnalyticsPage from './pages/Analytics'
-import UserMgmtPage from './pages/UserManagement'
 import StudentView from './pages/StudentView'
 import TeacherView from './pages/TeacherView'
 import StudentAppMgr from './pages/StudentAppManager'
@@ -25,6 +24,10 @@ import MobileHome from './pages/MobileHome'
 import MobileLearning from './pages/MobileLearning'
 import MobileSchedule from './pages/MobileSchedule'
 import MobileProfile from './pages/MobileProfile'
+import CircularManager from './pages/CircularManager'
+import AchievementManager from './pages/AchievementManager'
+import BulkImport from './pages/BulkImport'
+import UserManagement from './pages/UserManagement'
 
 // Modals
 import {
@@ -406,9 +409,57 @@ const pageTitles = {
     'mobile-profile': 'Profile',
 }
 
+// ── Admin Login Screen ──────────────────────────────────
+function AdminLogin() {
+    const { loginAdmin } = useApp()
+    const [email, setEmail] = useState('admin@amal.edu')
+    const [pass, setPass] = useState('admin123')
+    const [err, setErr] = useState('')
+
+    const handleLogin = (e) => {
+        e.preventDefault()
+        if (!loginAdmin(email, pass)) setErr('Invalid admin credentials.')
+    }
+
+    return (
+        <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #071845, #1034A6)', position: 'fixed', top: 0, left: 0, zIndex: 9999 }}>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ background: 'white', borderRadius: 32, padding: 48, width: 440, boxShadow: '0 40px 100px rgba(0,0,0,0.4)', textAlign: 'center' }}>
+                <div style={{ width: 80, height: 80, borderRadius: 24, background: 'linear-gradient(135deg, #10B981, #1E50E2)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 36, fontWeight: 900, boxShadow: '0 10px 25px rgba(16,185,129,0.3)' }}>A</div>
+                <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 28, fontWeight: 900, color: '#0A2463', margin: 0 }}>Super Admin Login</h1>
+                <p style={{ color: '#64748B', fontSize: 16, marginTop: 8, marginBottom: 32 }}>Amalorpavam School Management Suite</p>
+
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    <div style={{ textAlign: 'left' }}>
+                        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748B', marginLeft: 4 }}>ADMIN EMAIL</label>
+                        <input className="form-input" style={{ width: '100%', padding: '14px 18px', borderRadius: 16, marginTop: 6, border: '2px solid #F1F5F9', fontSize: 15 }} value={email} onChange={e => setEmail(e.target.value)} />
+                    </div>
+                    <div style={{ textAlign: 'left' }}>
+                        <label style={{ fontSize: 12, fontWeight: 700, color: '#64748B', marginLeft: 4 }}>PASSWORD</label>
+                        <input className="form-input" type="password" style={{ width: '100%', padding: '14px 18px', borderRadius: 16, marginTop: 6, border: '2px solid #F1F5F9', fontSize: 15 }} value={pass} onChange={e => setPass(e.target.value)} />
+                    </div>
+                    {err && <div style={{ background: '#FEE2E2', color: '#EF4444', padding: '12px', borderRadius: 12, fontSize: 13, fontWeight: 700 }}>{err}</div>}
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px', borderRadius: 18, fontSize: 16, fontWeight: 800, justifyContent: 'center', marginTop: 12 }}>Access Dashboard</button>
+                </form>
+
+                <div style={{ marginTop: 40, padding: 20, background: '#F8FAFC', borderRadius: 20, border: '1px solid #E2E8F0', textAlign: 'left' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#1034A6', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>System Access:</div>
+                    <div style={{ fontSize: 13, color: '#64748B', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Email:</span> <span style={{ fontWeight: 700, color: '#0F172A' }}>admin@amal.edu</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: '#64748B', display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                        <span>Pass:</span> <span style={{ fontWeight: 700, color: '#0F172A' }}>admin123</span>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    )
+}
+
 // ── App Shell ────────────────────────────────────────────────
 export default function App() {
-    const { activePage, setActivePage, openModal, addToast } = useApp()
+    const { activePage, setActivePage, openModal, addToast, admin, logoutAdmin } = useApp()
+
+    if (!admin) return <AdminLogin />
 
     const isMobileView = activePage.startsWith('mobile-')
 
@@ -421,7 +472,7 @@ export default function App() {
         analytics: <AnalyticsPage />,
         canteen: <CanteenPage />,
         inventory: <InventoryPage />,
-        usermgmt: <UserMgmtPage />,
+        usermgmt: <UserManagement />,
         studentAppMgr: <StudentAppMgr />,
         homework: <HomeworkAdmin />,
         exams: <ExamAllotment />,
@@ -433,10 +484,9 @@ export default function App() {
         'mobile-learning': <MobileLearning />,
         'mobile-schedule': <MobileSchedule />,
         'mobile-profile': <MobileProfile />,
-        // Awaiting Pages
-        circulars: <ModuleAwaiting title="Circulars" />,
-        achievements: <ModuleAwaiting title="Achievements" />,
-        'bulk-import': <ModuleAwaiting title="Bulk Import" />,
+        circulars: <CircularManager />,
+        achievements: <AchievementManager />,
+        'bulk-import': <BulkImport />,
     }
 
     if (isMobileView) {
@@ -478,7 +528,7 @@ export default function App() {
                     <button className="header-btn" onClick={() => openModal('systemSettings')}>
                         <Settings size={16} />
                     </button>
-                    <div className="avatar" title="Super Admin" onClick={() => addToast('Viewing profile…', 'info')}>SA</div>
+                    <div className="avatar" title="Logout" onClick={() => { if (confirm('Logout of Admin Portal?')) logoutAdmin() }}>SA</div>
                 </header>
                 {pageContent[activePage] || <AdminDashboard />}
             </div>

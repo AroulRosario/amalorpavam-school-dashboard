@@ -1,112 +1,184 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
+import { Users, GraduationCap, ShieldCheck, Search, Filter, Mail, Phone, MoreVertical, Trash2, Edit3, CheckCircle, XCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-export default function UserManagementPage() {
-    const { teachers, addTeacher, updateTeacher, deleteTeacher, addToast, openModal } = useApp()
+export default function UserManagement() {
+    const {
+        teachers, addTeacher, updateTeacher, deleteTeacher,
+        students, addStudent, updateStudent, deleteStudent,
+        addToast, openModal
+    } = useApp()
 
-    const roles = [
-        { name: 'Super Admin', tag: 'super-admin', users: [{ name: 'Fr. Joseph A.', email: 'principal@amal.edu', active: true }], color: '#1E50E2', perms: ['All access'] },
-        {
-            name: 'Admin', tag: 'admin', users: [
-                { name: 'Mrs. Selvi R.', email: 'selvi@amal.edu', active: true },
-                { name: 'Mr. Kumar P.', email: 'kumar@amal.edu', active: true },
-            ], color: '#8B5CF6', perms: ['Dashboard', 'Reports', 'Circulars']
-        },
-        {
-            name: 'Teacher', tag: 'teacher', users: teachers, color: '#10B981', perms: ['Attendance', 'Gradebook', 'Content']
-        },
+    const [activeTab, setActiveTab] = useState('teachers')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [classFilter, setClassFilter] = useState('All')
+
+    const admins = [
+        { id: 'admin1', name: 'Fr. Joseph A.', email: 'admin@amal.edu', role: 'Super Admin', active: true, phone: '9840001122' },
+        { id: 'admin2', name: 'Mrs. Selvi R.', email: 'selvi@amal.edu', role: 'Academic Coordinator', active: true, phone: '9840001123' },
     ]
 
-    const [tab, setTab] = useState('super-admin')
-    const current = roles.find(r => r.tag === tab)
+    const tabs = [
+        { id: 'teachers', label: 'Staff & Teachers', icon: Users, count: teachers.length, color: '#10B981' },
+        { id: 'students', label: 'Students', icon: GraduationCap, count: students.length, color: '#1E50E2' },
+        { id: 'admins', label: 'Administrators', icon: ShieldCheck, count: admins.length, color: '#7C3AED' },
+    ]
+
+    const filteredData = () => {
+        let base = []
+        if (activeTab === 'teachers') base = teachers
+        else if (activeTab === 'students') base = students
+        else base = admins
+
+        return base.filter(u => {
+            const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase())
+            const matchesClass = activeTab === 'students' && classFilter !== 'All' ? u.class === classFilter : true
+            return matchesSearch && matchesClass
+        })
+    }
+
+    const currentList = filteredData()
 
     return (
         <div className="dashboard-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
-                    <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 22, fontWeight: 800, color: '#0A2463' }}>User Management</h2>
-                    <p style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>Manage admin, teacher and staff accounts</p>
+                    <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 24, fontWeight: 800, color: '#0A2463', margin: 0 }}>User Management Hub</h2>
+                    <p style={{ color: '#64748B', fontSize: 14, marginTop: 4 }}>Centralized control for all school account types</p>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                    <button className="btn btn-outline" onClick={() => openModal('roleManagement')}>🔑 Role Permissions</button>
-                    <button className="btn btn-primary" onClick={() => addToast('New user invite sent!', 'success')}>+ Invite User</button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    <button className="btn btn-outline" onClick={() => openModal('roleManagement')}>
+                        <ShieldCheck size={18} /> Permissions
+                    </button>
+                    <button className="btn btn-primary" onClick={() => {
+                        if (activeTab === 'teachers') {
+                            const name = prompt('Teacher Name:')
+                            const email = prompt('Email:')
+                            if (name && email) addTeacher({ name, email, subjects: [], classes: [] })
+                        } else if (activeTab === 'students') {
+                            openModal('addStudent')
+                        } else {
+                            addToast('Admin creation restricted to Super Admin only.', 'info')
+                        }
+                    }}>
+                        + New {activeTab === 'teachers' ? 'Staff' : activeTab === 'students' ? 'Student' : 'Admin'}
+                    </button>
                 </div>
             </div>
 
-            {/* Role tabs */}
-            <div style={{ display: 'flex', gap: 8 }}>
-                {roles.map(r => (
-                    <button key={r.tag} className="btn"
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+                {tabs.map(t => (
+                    <button
+                        key={t.id}
+                        onClick={() => { setActiveTab(t.id); setSearchTerm(''); setClassFilter('All') }}
                         style={{
-                            background: tab === r.tag ? r.color : 'white', color: tab === r.tag ? 'white' : '#475569',
-                            border: '1.5px solid ' + (tab === r.tag ? r.color : '#E2E8F0')
+                            flex: 1,
+                            padding: '16px 24px',
+                            borderRadius: 20,
+                            border: 'none',
+                            background: activeTab === t.id ? t.color : 'white',
+                            color: activeTab === t.id ? 'white' : '#64748B',
+                            boxShadow: activeTab === t.id ? `0 10px 20px ${t.color}30` : '0 4px 12px rgba(0,0,0,0.05)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
                         }}
-                        onClick={() => setTab(r.tag)}>
-                        {r.name} <span style={{ marginLeft: 6, background: tab === r.tag ? 'rgba(255,255,255,.25)' : '#F1F5F9', color: tab === r.tag ? 'white' : '#64748B', borderRadius: 99, padding: '0 7px', fontSize: 11, fontWeight: 700 }}>{r.users.length}</span>
+                    >
+                        <div style={{ padding: 8, background: activeTab === t.id ? 'rgba(255,255,255,0.2)' : '#F1F5F9', borderRadius: 12 }}>
+                            <t.icon size={20} color={activeTab === t.id ? 'white' : t.color} />
+                        </div>
+                        <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontSize: 13, fontWeight: 800 }}>{t.label}</div>
+                            <div style={{ fontSize: 11, opacity: 0.7 }}>{t.count} Active Users</div>
+                        </div>
                     </button>
                 ))}
             </div>
 
-            {current && (
-                <>
-                    {/* Permissions */}
-                    <div className="card" style={{ padding: 16 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: '#64748B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>Permissions for {current.name}</div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {current.perms.map(p => <span key={p} className="tag tag-blue" style={{ fontSize: 12, padding: '4px 12px' }}>{p}</span>)}
-                            <button className="btn btn-outline btn-sm" onClick={() => openModal('roleManagement')}>Edit Permissions</button>
-                        </div>
-                    </div>
+            {/* Filters */}
+            <div className="card" style={{ padding: 16, marginBottom: 24, display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, background: '#F8FAFC', padding: '10px 16px', borderRadius: 14 }}>
+                    <Search size={18} color="#94A3B8" />
+                    <input
+                        placeholder={`Search ${activeTab}...`}
+                        style={{ border: 'none', background: 'none', outline: 'none', width: '100%', fontSize: 14 }}
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                {activeTab === 'students' && (
+                    <select
+                        className="form-input"
+                        style={{ width: 140, marginBottom: 0 }}
+                        value={classFilter}
+                        onChange={e => setClassFilter(e.target.value)}
+                    >
+                        <option>All Classes</option>
+                        <option>XII-A</option>
+                        <option>XII-B</option>
+                        <option>XI-A</option>
+                        <option>XI-B</option>
+                        <option>X-A</option>
+                    </select>
+                )}
+                <button className="btn btn-outline" style={{ padding: '10px 16px' }}><Filter size={18} /> More Filters</button>
+            </div>
 
-                    {/* Users table */}
-                    <div className="card">
-                        <div className="card-header">
-                            <div style={{ fontWeight: 700, fontSize: 14, color: '#0A2463' }}>{current.name} Accounts ({current.users.length})</div>
-                            <button className="btn btn-primary btn-sm" onClick={() => {
-                                if (tab === 'teacher') {
-                                    const name = prompt('Teacher Name:')
-                                    const email = prompt('Email:')
-                                    if (name && email) addTeacher({ name, email, subjects: [], classes: [] })
-                                } else {
-                                    addToast(`${current.name} invite sent!`, 'success')
+            {/* User List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {currentList.map((u, i) => (
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        key={u.id || i}
+                        className="card"
+                        style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 20 }}
+                    >
+                        <div style={{
+                            width: 48, height: 48, borderRadius: 16,
+                            background: activeTab === 'teachers' ? '#D1FAE5' : activeTab === 'students' ? '#E8EFFD' : '#F3E8FF',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 18, fontWeight: 900, color: tabs.find(t => t.id === activeTab).color
+                        }}>
+                            {u.name[0]}
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontWeight: 800, fontSize: 15, color: '#0A2463' }}>{u.name}</span>
+                                {u.active !== false ? <CheckCircle size={14} color="#10B981" /> : <XCircle size={14} color="#EF4444" />}
+                                {activeTab === 'students' && <span style={{ fontSize: 11, fontWeight: 800, background: '#F1F5F9', color: '#64748B', padding: '2px 8px', borderRadius: 6 }}>{u.class}</span>}
+                            </div>
+                            <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748B' }}><Mail size={12} /> {u.email}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748B' }}><Phone size={12} /> {u.phone || 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn btn-ghost btn-sm" onClick={() => addToast('Opening edit view...', 'info')}><Edit3 size={16} /></button>
+                            <button className="btn btn-ghost btn-sm" style={{ color: '#EF4444' }} onClick={() => {
+                                if (confirm('Delete user?')) {
+                                    if (activeTab === 'teachers') deleteTeacher(u.id)
+                                    else if (activeTab === 'students') deleteStudent(u.id)
+                                    else addToast('Cannot delete system admins.', 'error')
                                 }
-                            }}>+ Add</button>
+                            }}><Trash2 size={16} /></button>
+                            <button className="btn btn-ghost btn-sm"><MoreVertical size={16} /></button>
                         </div>
-                        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                            {current.users.map((u, i) => (
-                                <div key={u.id || i} style={{
-                                    display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px',
-                                    border: '1.5px solid #E2E8F0', borderRadius: 12, background: '#FAFAFA'
-                                }}>
-                                    <div style={{
-                                        width: 40, height: 40, borderRadius: '50%', background: `${current.color}20`,
-                                        border: `1.5px solid ${current.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontWeight: 800, color: current.color, fontSize: 15
-                                    }}>
-                                        {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{u.name}</div>
-                                        <div style={{ fontSize: 12, color: '#64748B' }}>{u.email}</div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: u.active ? '#10B981' : '#94A3B8', display: 'inline-block' }} />
-                                        <span style={{ fontSize: 12, color: u.active ? '#10B981' : '#94A3B8', fontWeight: 600 }}>{u.active ? 'Active' : 'Inactive'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 6 }}>
-                                        <button className="btn btn-outline btn-sm" onClick={() => addToast(`Editing ${u.name}…`, 'info')}>Edit</button>
-                                        <button className="btn btn-sm" style={{ background: u.active ? '#FEE2E2' : '#E8EFFD', color: u.active ? '#EF4444' : '#1034A6', border: 'none' }}
-                                            onClick={() => {
-                                                if (tab === 'teacher') updateTeacher(u.id, { active: !u.active })
-                                                else addToast(`${u.name} status toggled.`, 'warning')
-                                            }}>{u.active ? 'Disable' : 'Enable'}</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                    </motion.div>
+                ))}
+                {currentList.length === 0 && (
+                    <div style={{ padding: 48, textAlign: 'center', color: '#94A3B8' }}>
+                        No users found matching your criteria.
                     </div>
-                </>
-            )}
+                )}
+            </div>
         </div>
     )
 }
