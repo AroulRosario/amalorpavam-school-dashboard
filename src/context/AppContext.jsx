@@ -4,6 +4,10 @@ const AppContext = createContext()
 
 // Shared key for cross-app "database" simulation
 const STUDENT_DB_KEY = 'amal_student_db'
+const HOMEWORK_DB_KEY = 'amal_homework_db'
+const NEWS_DB_KEY = 'amal_news_db'
+const LIVE_CLASSES_DB_KEY = 'amal_live_classes_db'
+const APP_CONFIG_DB_KEY = 'amal_app_config_db'
 
 export function AppProvider({ children }) {
     // --- Existing State ---
@@ -46,11 +50,20 @@ export function AppProvider({ children }) {
         { id: 3, title: 'Organic Chem PPT', sub: 'Chemistry', type: 'PPT', date: 'Feb 18', teacher: 'Ms. Priya M.' },
     ])
 
-    const [homework, setHomework] = useState([
-        { id: 1, sub: 'Mathematics', topic: 'Exercise 8.2', deadline: 'Mar 04', done: false },
-        { id: 2, sub: 'Physics', topic: 'Ray Diagrams', deadline: 'Mar 05', done: true },
-        { id: 3, sub: 'English', topic: 'Essay on AI', deadline: 'Mar 06', done: false },
-    ])
+    const [homework, setHomework] = useState(() => {
+        const saved = localStorage.getItem(HOMEWORK_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, sub: 'Mathematics', topic: 'Exercise 8.2 - Integrals', deadline: 'Mar 04', done: false, desc: 'Complete all problems from Q1 to Q10.' },
+            { id: 2, sub: 'Physics', topic: 'Ray Diagrams & Lens Formula', deadline: 'Mar 05', done: true, desc: 'Draw diagrams for concave and convex lenses.' },
+            { id: 3, sub: 'English', topic: 'Essay on Future of AI', deadline: 'Mar 06', done: false, desc: 'Write a 500-word essay on AI in education.' },
+        ]
+    })
+
+    // Persist homework whenever updated
+    useEffect(() => {
+        localStorage.setItem(HOMEWORK_DB_KEY, JSON.stringify(homework))
+    }, [homework])
 
     const [attendance, setAttendance] = useState({
         'XII-A': { '1': true, '2': false, '3': true, '4': true }
@@ -58,23 +71,47 @@ export function AppProvider({ children }) {
 
     const [gradebook, setGradebook] = useState({})
 
-    const [news, setNews] = useState([
-        { id: 1, title: 'School Reopens after Holidays', date: 'Mar 01, 2026', type: 'General', content: 'We welcome all students back for the new term! Please ensure uniforms are strictly followed.', urgent: true },
-        { id: 2, title: 'Volleyball District Champions!', date: 'Feb 28, 2026', type: 'Sports', content: 'Our senior boys team has clinced the district trophy. Celebration on Monday.', image: true },
-        { id: 3, title: 'Inter-School Debate RSVP', date: 'Mar 02, 2026', type: 'Event', content: 'Register your names with the humanities department by EOD.', urgent: false }
-    ])
-
-    const [liveClasses, setLiveClasses] = useState([
-        { id: 1, subject: 'Mathematics', teacher: 'Ms. Anitha K.', time: '09:30 AM', status: 'Live', link: '#' },
-        { id: 2, subject: 'Physics', teacher: 'Mr. Rajan S.', time: '11:00 AM', status: 'Scheduled', link: '#' }
-    ])
-
-    const [appConfig, setAppConfig] = useState({
-        smsEnabled: true,
-        emailEnabled: true,
-        gpsEnabled: true,
-        studentAppBroadcast: 'Stay safe and keep learning!'
+    const [news, setNews] = useState(() => {
+        const saved = localStorage.getItem(NEWS_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, title: 'School Reopens after Holidays', date: 'Mar 01, 2026', type: 'General', content: 'We welcome all students back for the new term! Please ensure uniforms are strictly followed.', urgent: true },
+            { id: 2, title: 'Volleyball District Champions!', date: 'Feb 28, 2026', type: 'Sports', content: 'Our senior boys team has clinced the district trophy. Celebration on Monday.', image: true },
+            { id: 3, title: 'Inter-School Debate RSVP', date: 'Mar 02, 2026', type: 'Event', content: 'Register your names with the humanities department by EOD.', urgent: false }
+        ]
     })
+
+    useEffect(() => {
+        localStorage.setItem(NEWS_DB_KEY, JSON.stringify(news))
+    }, [news])
+
+    const [liveClasses, setLiveClasses] = useState(() => {
+        const saved = localStorage.getItem(LIVE_CLASSES_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, subject: 'Mathematics', teacher: 'Ms. Anitha K.', time: '09:30 AM', status: 'Live', link: '#' },
+            { id: 2, subject: 'Physics', teacher: 'Mr. Rajan S.', time: '11:00 AM', status: 'Scheduled', link: '#' }
+        ]
+    })
+
+    useEffect(() => {
+        localStorage.setItem(LIVE_CLASSES_DB_KEY, JSON.stringify(liveClasses))
+    }, [liveClasses])
+
+    const [appConfig, setAppConfig] = useState(() => {
+        const saved = localStorage.getItem(APP_CONFIG_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return {
+            smsEnabled: true,
+            emailEnabled: true,
+            gpsEnabled: true,
+            studentAppBroadcast: 'Stay safe and keep learning!'
+        }
+    })
+
+    useEffect(() => {
+        localStorage.setItem(APP_CONFIG_DB_KEY, JSON.stringify(appConfig))
+    }, [appConfig])
 
     const [activePage, setActivePage] = useState('dashboard')
     const [toasts, setToasts] = useState([])
@@ -92,6 +129,7 @@ export function AppProvider({ children }) {
 
     const addStudent = (s) => setStudents(prev => [...prev, { ...s, id: Date.now(), status: 'Active' }])
     const deleteStudent = (id) => setStudents(prev => prev.filter(s => s.id !== id))
+    const updateStudent = (id, updates) => setStudents(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s))
 
     // CSV Import Handler
     const importStudents = (list) => {
@@ -117,6 +155,8 @@ export function AppProvider({ children }) {
     const addContent = (c) => setContent(prev => [{ ...c, id: Date.now(), date: 'Today' }, ...prev])
 
     const toggleHomework = (id) => setHomework(prev => prev.map(h => h.id === id ? { ...h, done: !h.done } : h))
+    const addHomework = (h) => setHomework(prev => [{ ...h, id: Date.now(), done: false }, ...prev])
+    const deleteHomework = (id) => setHomework(prev => prev.filter(h => h.id !== id))
 
     const toggleAttendance = (cls, sid) => setAttendance(prev => {
         const clsAtt = { ...prev[cls] }
@@ -132,12 +172,12 @@ export function AppProvider({ children }) {
 
     return (
         <AppContext.Provider value={{
-            students, addStudent, deleteStudent, importStudents,
+            students, addStudent, deleteStudent, updateStudent, importStudents,
             events, addEvent, deleteEvent,
             appointments, addAppointment, updateAppointment,
             inventory, updateInventory,
             content, addContent,
-            homework, toggleHomework,
+            homework, toggleHomework, addHomework, deleteHomework,
             attendance, toggleAttendance,
             gradebook, saveGrades,
             news, addNews,

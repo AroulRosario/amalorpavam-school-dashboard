@@ -14,6 +14,8 @@ import UserMgmtPage from './pages/UserManagement'
 import StudentView from './pages/StudentView'
 import TeacherView from './pages/TeacherView'
 import StudentAppMgr from './pages/StudentAppManager'
+import HomeworkAdmin from './pages/HomeworkAdmin'
+import ModuleAwaiting from './pages/ModuleAwaiting'
 
 // Mobile Pages
 import MobileHome from './pages/MobileHome'
@@ -89,17 +91,18 @@ function Donut({ segments }) {
 // ── Admin Dashboard ─────────────────────────────────────────
 const moduleCards = [
     { icon: Smartphone, color: '#6366F1', bg: '#EEF2FF', title: 'Student App Manager', desc: 'Control News Feed & Live Classes', tag: 'Advanced', modal: null, page: 'studentAppMgr' },
-    { icon: Bell, color: '#1E50E2', bg: '#E8EFFD', title: 'Circular Distribution', desc: 'Send & track school circulars', tag: '3 New', modal: null, page: null },
+    { icon: CheckSquare, color: '#10B981', bg: '#D1FAE5', title: 'Homework Manager', desc: 'Assign & Track Student Tasks', tag: 'New', modal: null, page: 'homework' },
+    { icon: Bell, color: '#1E50E2', bg: '#E8EFFD', title: 'Circular Distribution', desc: 'Send & track school circulars', tag: '3 New', modal: null, page: 'circulars' },
     { icon: Award, color: '#F59E0B', bg: '#FEF3C7', title: 'Rank Card Management', desc: 'Generate & publish rank cards', tag: 'Active', modal: null, page: 'analytics' },
     { icon: CreditCard, color: '#EF4444', bg: '#FEE2E2', title: 'Fee Management', desc: '₹2.4L outstanding · Send reminders', tag: '12 Due', modal: 'feeReminder', page: 'fees' },
     { icon: Layers, color: '#8B5CF6', bg: '#EDE9FE', title: 'Content Portal', desc: 'PPTs · PDFs · Video Lectures', tag: 'Upload', modal: 'uploadContent', page: 'content' },
-    { icon: Star, color: '#F59E0B', bg: '#FEF3C7', title: 'Achievements Portal', desc: 'Student competitions & awards', tag: '7 New', modal: null, page: null },
+    { icon: Star, color: '#F59E0B', bg: '#FEF3C7', title: 'Achievements Portal', desc: 'Student competitions & awards', tag: '7 New', modal: null, page: 'achievements' },
     { icon: Calendar, color: '#10B981', bg: '#D1FAE5', title: 'Event Calendar', desc: 'Sports Day · Annual Day · Exams', tag: '5 Events', modal: null, page: 'events' },
     { icon: Utensils, color: '#F97316', bg: '#FFEDD5', title: 'Canteen Management', desc: 'Morning & Lunch order overview', tag: 'Live', modal: null, page: 'canteen' },
     { icon: Package, color: '#0EA5E9', bg: '#E0F2FE', title: 'Inventory Store', desc: 'Uniforms · Notebooks · Books', tag: 'Manage', modal: null, page: 'inventory' },
     { icon: BarChart2, color: '#1E50E2', bg: '#E8EFFD', title: 'Performance Analytics', desc: 'Class-wise & subject trending', tag: 'Live', modal: null, page: 'analytics' },
     { icon: UserCog, color: '#6366F1', bg: '#EEF2FF', title: 'Principal Appointments', desc: 'Book & manage meeting slots', tag: '4 Pending', modal: 'addAppointment', page: 'events' },
-    { icon: Database, color: '#64748B', bg: '#F1F5F9', title: 'Bulk CSV Upload', desc: 'Import Students · Staff · Marks', tag: 'Import', modal: 'bulkCSV', page: null },
+    { icon: Database, color: '#64748B', bg: '#F1F5F9', title: 'Bulk CSV Upload', desc: 'Import Students · Staff · Marks', tag: 'Import', modal: 'bulkCSV', page: 'bulk-import' },
 ]
 
 function AdminDashboard() {
@@ -386,6 +389,7 @@ const pageTitles = {
     inventory: 'Inventory Store',
     usermgmt: 'User Management',
     studentAppMgr: 'Student App Manager',
+    homework: 'Homework Manager',
     'student-view': 'Student View — Kavya Nair',
     'teacher-view': 'Teacher View — Ms. Anitha Kumar',
     'mobile-home': 'Welcome, Kavya',
@@ -411,12 +415,17 @@ export default function App() {
         inventory: <InventoryPage />,
         usermgmt: <UserMgmtPage />,
         studentAppMgr: <StudentAppMgr />,
+        homework: <HomeworkAdmin />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,
         'mobile-home': <MobileHome />,
         'mobile-learning': <MobileLearning />,
         'mobile-schedule': <MobileSchedule />,
         'mobile-profile': <MobileProfile />,
+        // Awaiting Pages
+        circulars: <ModuleAwaiting title="Circulars" />,
+        achievements: <ModuleAwaiting title="Achievements" />,
+        'bulk-import': <ModuleAwaiting title="Bulk Import" />,
     }
 
     if (isMobileView) {

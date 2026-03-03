@@ -3,7 +3,14 @@ import { useApp } from '../context/AppContext'
 import { Plus, Trash2, Search, Users, Upload, FileText } from 'lucide-react'
 
 export default function StudentsPage() {
-    const { students, deleteStudent, openModal, addToast, importStudents } = useApp()
+    const { students, deleteStudent, updateStudent, openModal, addToast, importStudents } = useApp()
+
+    const toggleFee = (student) => {
+        const flow = { Paid: 'Pending', Pending: 'Overdue', Overdue: 'Paid' }
+        const next = flow[student.fee] || 'Paid'
+        updateStudent(student.id, { fee: next })
+        addToast(`${student.name} status: ${next}`, 'info')
+    }
     const [search, setSearch] = useState('')
     const [filterClass, setFilterClass] = useState('All')
     const [filterFee, setFilterFee] = useState('All')
@@ -159,7 +166,16 @@ export default function StudentsPage() {
                                             <span style={{ fontSize: 12, fontWeight: 600 }}>{s.attendance}%</span>
                                         </div>
                                     </td>
-                                    <td><span className={`chip chip-${feeColor[s.fee]}`}>{s.fee}</span></td>
+                                    <td>
+                                        <span
+                                            onClick={() => toggleFee(s)}
+                                            className={`chip chip-${feeColor[s.fee]}`}
+                                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                                            title="Click to toggle status"
+                                        >
+                                            {s.fee}
+                                        </span>
+                                    </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 6 }}>
                                             <button className="btn btn-ghost btn-sm"

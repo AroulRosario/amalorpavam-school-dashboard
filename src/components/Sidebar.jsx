@@ -2,12 +2,13 @@ import { useApp } from '../context/AppContext'
 import {
     LayoutDashboard, Users, BookOpen, Calendar, Settings,
     CreditCard, Layers, BarChart2, Utensils, Package,
-    UserCog, LogOut, ChevronRight, Globe, Smartphone
+    UserCog, LogOut, ChevronRight, Globe, Smartphone, CheckSquare
 } from 'lucide-react'
 
 const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'students', icon: Users, label: 'Students' },
+    { id: 'homework', icon: CheckSquare, label: 'Homework Manager 📝' },
     { id: 'studentAppMgr', icon: Smartphone, label: 'Student App Manager 📱' },
     { id: 'fees', icon: CreditCard, label: 'Fee Management', badge: '3' },
     { id: 'content', icon: Layers, label: 'Content Portal' },
