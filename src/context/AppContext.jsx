@@ -4,10 +4,12 @@ const AppContext = createContext()
 
 // Shared key for cross-app "database" simulation
 const STUDENT_DB_KEY = 'amal_student_db'
+const TEACHER_DB_KEY = 'amal_teacher_db'
 const HOMEWORK_DB_KEY = 'amal_homework_db'
 const NEWS_DB_KEY = 'amal_news_db'
 const LIVE_CLASSES_DB_KEY = 'amal_live_classes_db'
 const APP_CONFIG_DB_KEY = 'amal_app_config_db'
+const EXAM_DB_KEY = 'amal_exam_db'
 
 export function AppProvider({ children }) {
     // --- Existing State ---
@@ -15,10 +17,10 @@ export function AppProvider({ children }) {
         const saved = localStorage.getItem(STUDENT_DB_KEY)
         if (saved) return JSON.parse(saved)
         return [
-            { id: 1, name: 'Kavya Nair', class: 'XII-A', roll: '04', gender: 'Female', phone: '9876543210', avg: 94, attendance: 98, fee: 'Paid', status: 'Active', email: 'kavya@student.ahss.edu', password: 'password123' },
-            { id: 2, name: 'Rahul Verma', class: 'XII-A', roll: '12', gender: 'Male', phone: '9876543211', avg: 82, attendance: 85, fee: 'Pending', status: 'Active', email: 'rahul@student.ahss.edu', password: 'password123' },
-            { id: 3, name: 'Aditi Rao', class: 'XI-B', roll: '07', gender: 'Female', phone: '9876543212', avg: 75, attendance: 90, fee: 'Overdue', status: 'Active', email: 'aditi@student.ahss.edu', password: 'password123' },
-            { id: 4, name: 'Sanjay Kumar', class: 'X-A', roll: '22', gender: 'Male', phone: '9876543213', avg: 68, attendance: 72, fee: 'Paid', status: 'Inactive', email: 'sanjay@student.ahss.edu', password: 'password123' },
+            { id: 1, name: 'Kavya Nair', class: 'XII-A', roll: '04', gender: 'Female', phone: '9876543210', avg: 94, attendance: 98, fee: 'Paid', status: 'Active', email: 'kavya@student.ahss.edu', password: 'password123', teacherId: 1 },
+            { id: 2, name: 'Rahul Verma', class: 'XII-A', roll: '12', gender: 'Male', phone: '9876543211', avg: 82, attendance: 85, fee: 'Pending', status: 'Active', email: 'rahul@student.ahss.edu', password: 'password123', teacherId: 1 },
+            { id: 3, name: 'Aditi Rao', class: 'XI-B', roll: '07', gender: 'Female', phone: '9876543212', avg: 75, attendance: 90, fee: 'Overdue', status: 'Active', email: 'aditi@student.ahss.edu', password: 'password123', teacherId: 2 },
+            { id: 4, name: 'Sanjay Kumar', class: 'X-A', roll: '22', gender: 'Male', phone: '9876543213', avg: 68, attendance: 72, fee: 'Paid', status: 'Inactive', email: 'sanjay@student.ahss.edu', password: 'password123', teacherId: null },
         ]
     })
 
@@ -26,6 +28,20 @@ export function AppProvider({ children }) {
     useEffect(() => {
         localStorage.setItem(STUDENT_DB_KEY, JSON.stringify(students))
     }, [students])
+
+    const [teachers, setTeachers] = useState(() => {
+        const saved = localStorage.getItem(TEACHER_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, name: 'Ms. Anitha K.', email: 'anitha@amal.edu', subjects: ['Mathematics'], classes: ['XII-A', 'X-B'], active: true },
+            { id: 2, name: 'Mr. Rajan S.', email: 'rajan@amal.edu', subjects: ['Physics'], classes: ['XI-B', 'XII-A'], active: true },
+            { id: 3, name: 'Ms. Priya M.', email: 'priya@amal.edu', subjects: ['Chemistry'], classes: ['XII-A'], active: false },
+        ]
+    })
+
+    useEffect(() => {
+        localStorage.setItem(TEACHER_DB_KEY, JSON.stringify(teachers))
+    }, [teachers])
 
     const [events, setEvents] = useState([
         { id: 1, day: '08', month: 'Mar', year: 2026, name: 'Annual Sports Meet', desc: 'Main Ground · 9:00 AM', type: 'Sports' },
@@ -54,9 +70,9 @@ export function AppProvider({ children }) {
         const saved = localStorage.getItem(HOMEWORK_DB_KEY)
         if (saved) return JSON.parse(saved)
         return [
-            { id: 1, sub: 'Mathematics', topic: 'Exercise 8.2 - Integrals', deadline: 'Mar 04', done: false, desc: 'Complete all problems from Q1 to Q10.' },
-            { id: 2, sub: 'Physics', topic: 'Ray Diagrams & Lens Formula', deadline: 'Mar 05', done: true, desc: 'Draw diagrams for concave and convex lenses.' },
-            { id: 3, sub: 'English', topic: 'Essay on Future of AI', deadline: 'Mar 06', done: false, desc: 'Write a 500-word essay on AI in education.' },
+            { id: 1, sub: 'Mathematics', topic: 'Exercise 8.2 - Integrals', deadline: 'Mar 04', done: false, desc: 'Complete all problems from Q1 to Q10.', teacherId: 1 },
+            { id: 2, sub: 'Physics', topic: 'Ray Diagrams & Lens Formula', deadline: 'Mar 05', done: true, desc: 'Draw diagrams for concave and convex lenses.', teacherId: 2 },
+            { id: 3, sub: 'English', topic: 'Essay on Future of AI', deadline: 'Mar 06', done: false, desc: 'Write a 500-word essay on AI in education.', teacherId: null },
         ]
     })
 
@@ -70,6 +86,16 @@ export function AppProvider({ children }) {
     })
 
     const [gradebook, setGradebook] = useState({})
+
+    const [exams, setExams] = useState(() => {
+        const saved = localStorage.getItem(EXAM_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return []
+    })
+
+    useEffect(() => {
+        localStorage.setItem(EXAM_DB_KEY, JSON.stringify(exams))
+    }, [exams])
 
     const [news, setNews] = useState(() => {
         const saved = localStorage.getItem(NEWS_DB_KEY)
@@ -166,6 +192,11 @@ export function AppProvider({ children }) {
 
     const saveGrades = (cls, grades) => setGradebook(prev => ({ ...prev, [cls]: grades }))
 
+    const addTeacher = (t) => setTeachers(prev => [{ ...t, id: Date.now(), active: true }, ...prev])
+    const updateTeacher = (id, updates) => setTeachers(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+    const deleteTeacher = (id) => setTeachers(prev => prev.filter(t => t.id !== id))
+    const allotExam = (exam) => setExams(prev => [{ ...exam, id: Date.now() }, ...prev])
+
     const addNews = (n) => setNews(prev => [{ ...n, id: Date.now(), date: new Date().toLocaleDateString() }, ...prev])
     const updateLiveClass = (id, status) => setLiveClasses(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     const broadcastMsg = (msg) => setAppConfig(prev => ({ ...prev, studentAppBroadcast: msg }))
@@ -180,6 +211,8 @@ export function AppProvider({ children }) {
             homework, toggleHomework, addHomework, deleteHomework,
             attendance, toggleAttendance,
             gradebook, saveGrades,
+            teachers, addTeacher, updateTeacher, deleteTeacher,
+            exams, allotExam,
             news, addNews,
             liveClasses, updateLiveClass,
             appConfig, setAppConfig, broadcastMsg,

@@ -1,25 +1,22 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 
-const roles = [
-    { name: 'Super Admin', tag: 'super-admin', users: [{ name: 'Fr. Joseph A.', email: 'principal@amal.edu', active: true }], color: '#1E50E2', perms: ['All access'] },
-    {
-        name: 'Admin', tag: 'admin', users: [
-            { name: 'Mrs. Selvi R.', email: 'selvi@amal.edu', active: true },
-            { name: 'Mr. Kumar P.', email: 'kumar@amal.edu', active: true },
-        ], color: '#8B5CF6', perms: ['Dashboard', 'Reports', 'Circulars']
-    },
-    {
-        name: 'Teacher', tag: 'teacher', users: [
-            { name: 'Ms. Anitha K.', email: 'anitha@amal.edu', active: true },
-            { name: 'Mr. Rajan S.', email: 'rajan@amal.edu', active: true },
-            { name: 'Ms. Priya M.', email: 'priya@amal.edu', active: false },
-        ], color: '#10B981', perms: ['Attendance', 'Gradebook', 'Content']
-    },
-]
-
 export default function UserManagementPage() {
-    const { addToast, openModal } = useApp()
+    const { teachers, addTeacher, updateTeacher, deleteTeacher, addToast, openModal } = useApp()
+
+    const roles = [
+        { name: 'Super Admin', tag: 'super-admin', users: [{ name: 'Fr. Joseph A.', email: 'principal@amal.edu', active: true }], color: '#1E50E2', perms: ['All access'] },
+        {
+            name: 'Admin', tag: 'admin', users: [
+                { name: 'Mrs. Selvi R.', email: 'selvi@amal.edu', active: true },
+                { name: 'Mr. Kumar P.', email: 'kumar@amal.edu', active: true },
+            ], color: '#8B5CF6', perms: ['Dashboard', 'Reports', 'Circulars']
+        },
+        {
+            name: 'Teacher', tag: 'teacher', users: teachers, color: '#10B981', perms: ['Attendance', 'Gradebook', 'Content']
+        },
+    ]
+
     const [tab, setTab] = useState('super-admin')
     const current = roles.find(r => r.tag === tab)
 
@@ -65,11 +62,19 @@ export default function UserManagementPage() {
                     <div className="card">
                         <div className="card-header">
                             <div style={{ fontWeight: 700, fontSize: 14, color: '#0A2463' }}>{current.name} Accounts ({current.users.length})</div>
-                            <button className="btn btn-primary btn-sm" onClick={() => addToast(`New ${current.name} user added!`, 'success')}>+ Add</button>
+                            <button className="btn btn-primary btn-sm" onClick={() => {
+                                if (tab === 'teacher') {
+                                    const name = prompt('Teacher Name:')
+                                    const email = prompt('Email:')
+                                    if (name && email) addTeacher({ name, email, subjects: [], classes: [] })
+                                } else {
+                                    addToast(`${current.name} invite sent!`, 'success')
+                                }
+                            }}>+ Add</button>
                         </div>
                         <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {current.users.map((u, i) => (
-                                <div key={i} style={{
+                                <div key={u.id || i} style={{
                                     display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px',
                                     border: '1.5px solid #E2E8F0', borderRadius: 12, background: '#FAFAFA'
                                 }}>
@@ -90,8 +95,11 @@ export default function UserManagementPage() {
                                     </div>
                                     <div style={{ display: 'flex', gap: 6 }}>
                                         <button className="btn btn-outline btn-sm" onClick={() => addToast(`Editing ${u.name}…`, 'info')}>Edit</button>
-                                        <button className="btn btn-sm" style={{ background: '#FEE2E2', color: '#EF4444', border: 'none' }}
-                                            onClick={() => addToast(`${u.name} deactivated.`, 'warning')}>Disable</button>
+                                        <button className="btn btn-sm" style={{ background: u.active ? '#FEE2E2' : '#E8EFFD', color: u.active ? '#EF4444' : '#1034A6', border: 'none' }}
+                                            onClick={() => {
+                                                if (tab === 'teacher') updateTeacher(u.id, { active: !u.active })
+                                                else addToast(`${u.name} status toggled.`, 'warning')
+                                            }}>{u.active ? 'Disable' : 'Enable'}</button>
                                     </div>
                                 </div>
                             ))}

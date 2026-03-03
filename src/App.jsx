@@ -16,6 +16,7 @@ import TeacherView from './pages/TeacherView'
 import StudentAppMgr from './pages/StudentAppManager'
 import HomeworkAdmin from './pages/HomeworkAdmin'
 import ModuleAwaiting from './pages/ModuleAwaiting'
+import ExamAllotment from './pages/ExamAllotment'
 
 // Mobile Pages
 import MobileHome from './pages/MobileHome'
@@ -36,7 +37,7 @@ import {
     TrendingUp, TrendingDown, Users, GraduationCap, CreditCard,
     Layers, Award, Package, Utensils, BarChart2, Database,
     UserCog, Globe, Star, Shield, ChevronRight, Plus, Send,
-    Activity, CheckSquare, Upload, Edit3, Smartphone
+    Activity, CheckSquare, Upload, Edit3, Smartphone, BookOpen, Briefcase, ClipboardCheck
 } from 'lucide-react'
 
 // Components
@@ -390,6 +391,7 @@ const pageTitles = {
     usermgmt: 'User Management',
     studentAppMgr: 'Student App Manager',
     homework: 'Homework Manager',
+    exams: 'Exam Allotment',
     'student-view': 'Student View — Kavya Nair',
     'teacher-view': 'Teacher View — Ms. Anitha Kumar',
     'mobile-home': 'Welcome, Kavya',
@@ -416,6 +418,7 @@ export default function App() {
         usermgmt: <UserMgmtPage />,
         studentAppMgr: <StudentAppMgr />,
         homework: <HomeworkAdmin />,
+        exams: <ExamAllotment />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,
         'mobile-home': <MobileHome />,
