@@ -17,6 +17,8 @@ import StudentAppMgr from './pages/StudentAppManager'
 import HomeworkAdmin from './pages/HomeworkAdmin'
 import ModuleAwaiting from './pages/ModuleAwaiting'
 import ExamAllotment from './pages/ExamAllotment'
+import TimetableManager from './pages/TimetableManager'
+import TeacherManager from './pages/TeacherManager'
 
 // Mobile Pages
 import MobileHome from './pages/MobileHome'
@@ -92,7 +94,10 @@ function Donut({ segments }) {
 // ── Admin Dashboard ─────────────────────────────────────────
 const moduleCards = [
     { icon: Smartphone, color: '#6366F1', bg: '#EEF2FF', title: 'Student App Manager', desc: 'Control News Feed & Live Classes', tag: 'Advanced', modal: null, page: 'studentAppMgr' },
-    { icon: CheckSquare, color: '#10B981', bg: '#D1FAE5', title: 'Homework Manager', desc: 'Assign & Track Student Tasks', tag: 'New', modal: null, page: 'homework' },
+    { icon: CheckSquare, color: '#10B981', bg: '#D1FAE5', title: 'Homework Manager', desc: 'Assign to individual students', tag: 'New', modal: null, page: 'homework' },
+    { icon: UserCog, color: '#8B5CF6', bg: '#EDE9FE', title: 'Teacher Manager', desc: 'Staff CRUD · Permissions · Mapping', tag: 'Core', modal: null, page: 'teacher-mgr' },
+    { icon: Calendar, color: '#0EA5E9', bg: '#E0F2FE', title: 'Timetable Manager', desc: 'Class-wise LKG–12 schedules', tag: 'New', modal: null, page: 'timetable' },
+    { icon: ClipboardCheck, color: '#F59E0B', bg: '#FEF3C7', title: 'Exam Allotment', desc: 'Assign exams to teachers', tag: 'Active', modal: null, page: 'exams' },
     { icon: Bell, color: '#1E50E2', bg: '#E8EFFD', title: 'Circular Distribution', desc: 'Send & track school circulars', tag: '3 New', modal: null, page: 'circulars' },
     { icon: Award, color: '#F59E0B', bg: '#FEF3C7', title: 'Rank Card Management', desc: 'Generate & publish rank cards', tag: 'Active', modal: null, page: 'analytics' },
     { icon: CreditCard, color: '#EF4444', bg: '#FEE2E2', title: 'Fee Management', desc: '₹2.4L outstanding · Send reminders', tag: '12 Due', modal: 'feeReminder', page: 'fees' },
@@ -102,7 +107,6 @@ const moduleCards = [
     { icon: Utensils, color: '#F97316', bg: '#FFEDD5', title: 'Canteen Management', desc: 'Morning & Lunch order overview', tag: 'Live', modal: null, page: 'canteen' },
     { icon: Package, color: '#0EA5E9', bg: '#E0F2FE', title: 'Inventory Store', desc: 'Uniforms · Notebooks · Books', tag: 'Manage', modal: null, page: 'inventory' },
     { icon: BarChart2, color: '#1E50E2', bg: '#E8EFFD', title: 'Performance Analytics', desc: 'Class-wise & subject trending', tag: 'Live', modal: null, page: 'analytics' },
-    { icon: UserCog, color: '#6366F1', bg: '#EEF2FF', title: 'Principal Appointments', desc: 'Book & manage meeting slots', tag: '4 Pending', modal: 'addAppointment', page: 'events' },
     { icon: Database, color: '#64748B', bg: '#F1F5F9', title: 'Bulk CSV Upload', desc: 'Import Students · Staff · Marks', tag: 'Import', modal: 'bulkCSV', page: 'bulk-import' },
 ]
 
@@ -392,6 +396,8 @@ const pageTitles = {
     studentAppMgr: 'Student App Manager',
     homework: 'Homework Manager',
     exams: 'Exam Allotment',
+    'teacher-mgr': 'Teacher Manager',
+    timetable: 'Timetable Manager',
     'student-view': 'Student View — Kavya Nair',
     'teacher-view': 'Teacher View — Ms. Anitha Kumar',
     'mobile-home': 'Welcome, Kavya',
@@ -419,6 +425,8 @@ export default function App() {
         studentAppMgr: <StudentAppMgr />,
         homework: <HomeworkAdmin />,
         exams: <ExamAllotment />,
+        'teacher-mgr': <TeacherManager />,
+        timetable: <TimetableManager />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,
         'mobile-home': <MobileHome />,
