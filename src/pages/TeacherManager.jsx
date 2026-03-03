@@ -54,7 +54,7 @@ export default function TeacherManager() {
 
             {/* Tab Bar */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: '#F1F5F9', borderRadius: 12, padding: 4 }}>
-                {[{ id: 'roster', label: 'Staff Roster' }, { id: 'permissions', label: 'Permissions' }, { id: 'mapping', label: 'Student Mapping' }].map(t => (
+                {[{ id: 'roster', label: 'Staff Roster' }, { id: 'permissions', label: 'Permissions' }].map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
                         flex: 1, padding: '10px 16px', borderRadius: 10, fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer',
                         background: activeTab === t.id ? 'white' : 'transparent',
@@ -126,52 +126,6 @@ export default function TeacherManager() {
                 </div>
             )}
 
-            {/* STUDENT MAPPING */}
-            {activeTab === 'mapping' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-                        <button onClick={() => setSelectedTeacher(null)} className="btn btn-sm" style={{ background: !selectedTeacher ? '#1034A6' : '#F1F5F9', color: !selectedTeacher ? 'white' : '#64748B', border: 'none', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>All</button>
-                        {teachers.filter(t => t.active).map(t => (
-                            <button key={t.id} onClick={() => setSelectedTeacher(t.id)} className="btn btn-sm" style={{ background: selectedTeacher === t.id ? '#1034A6' : '#F1F5F9', color: selectedTeacher === t.id ? 'white' : '#64748B', border: 'none', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>{t.name}</button>
-                        ))}
-                    </div>
-                    <div className="card" style={{ overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: '#F8FAFC' }}>
-                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Student</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Class</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Assigned Teacher</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {students.filter(s => !selectedTeacher || s.teacherId === selectedTeacher).map(s => {
-                                    const teacher = teachers.find(t => t.id === s.teacherId)
-                                    return (
-                                        <tr key={s.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                            <td style={{ padding: '14px 16px' }}>
-                                                <div style={{ fontWeight: 700 }}>{s.name}</div>
-                                                <div style={{ fontSize: 11, color: '#64748B' }}>Roll: {s.roll}</div>
-                                            </td>
-                                            <td style={{ padding: '14px 16px', fontWeight: 600, fontSize: 13 }}>{s.class}</td>
-                                            <td style={{ padding: '14px 16px' }}>
-                                                <select className="form-input" style={{ maxWidth: 200, padding: '6px 10px' }} value={s.teacherId || ''} onChange={e => updateStudent(s.id, { teacherId: e.target.value ? Number(e.target.value) : null })}>
-                                                    <option value="">— Unassigned —</option>
-                                                    {teachers.filter(t => t.active).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                                </select>
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                                                <span style={{ fontSize: 12, fontWeight: 800, color: teacher ? '#10B981' : '#F59E0B' }}>{teacher ? '✓ Mapped' : '⚠ None'}</span>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
 
             {/* Add/Edit Teacher Modal */}
             <AnimatePresence>
