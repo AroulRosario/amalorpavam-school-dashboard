@@ -11,7 +11,7 @@ export default function ExamAllotment() {
 
     const [formData, setFormData] = useState({
         title: '',
-        class: '',
+        classes: [],
         subject: '',
         teacherId: '',
         date: ''
@@ -19,10 +19,15 @@ export default function ExamAllotment() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        if (!formData.title || !formData.teacherId || !formData.class) return
-        allotExam(formData)
-        addToast('Exam allotted successfully!', 'success')
+        if (!formData.title || !formData.teacherId || formData.classes.length === 0) return
+
+        formData.classes.forEach(cls => {
+            allotExam({ ...formData, class: cls, classes: undefined })
+        })
+
+        addToast(`Exam allotted to ${formData.classes.length} classes successfully!`, 'success')
         setShowAllot(false)
+        setFormData({ title: '', classes: [], subject: '', teacherId: '', date: '' })
     }
 
     // Grouping Logic
@@ -161,12 +166,29 @@ export default function ExamAllotment() {
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#475569', marginBottom: 6 }}>TARGET CLASS</label>
-                                        <select className="form-input" value={formData.class} onChange={e => setFormData({ ...formData, class: e.target.value })}>
-                                            <option value="">Select Class...</option>
-                                            {classMappings.map(m => <option key={m.id} value={m.class}>{m.class}</option>)}
-                                            {classMappings.length === 0 && <option disabled>No classes configured in Manager</option>}
-                                        </select>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                            <label style={{ fontSize: 12, fontWeight: 800, color: '#475569' }}>TARGET CLASSES</label>
+                                            <button type="button" onClick={() => {
+                                                if (formData.classes.length === classMappings.length) setFormData({ ...formData, classes: [] })
+                                                else setFormData({ ...formData, classes: classMappings.map(m => m.class) })
+                                            }} style={{ background: 'none', border: 'none', color: '#1E50E2', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                                                {formData.classes.length === classMappings.length && classMappings.length > 0 ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                        </div>
+                                        <div style={{ border: '1.5px solid #E2E8F0', borderRadius: 12, maxHeight: 120, overflowY: 'auto', background: 'white' }}>
+                                            {classMappings.map(m => (
+                                                <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '1px solid #F1F5F9', cursor: 'pointer', fontSize: 14 }}>
+                                                    <input type="checkbox" checked={formData.classes.includes(m.class)}
+                                                        onChange={(e) => {
+                                                            const newClasses = e.target.checked ? [...formData.classes, m.class] : formData.classes.filter(c => c !== m.class)
+                                                            setFormData({ ...formData, classes: newClasses })
+                                                        }}
+                                                    />
+                                                    {m.class}
+                                                </label>
+                                            ))}
+                                            {classMappings.length === 0 && <div style={{ padding: 14, fontSize: 13, color: '#94A3B8' }}>No classes configured in Manager</div>}
+                                        </div>
                                     </div>
                                     <div>
                                         <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#475569', marginBottom: 6 }}>SUBJECT</label>

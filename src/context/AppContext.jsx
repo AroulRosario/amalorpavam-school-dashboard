@@ -313,6 +313,7 @@ export function AppProvider({ children }) {
 
     // Class Mapping Actions
     const addClassMapping = (mapping) => setClassMappings(prev => [...prev, { ...mapping, id: Date.now() }])
+    const updateClassMapping = (id, newMapping) => setClassMappings(prev => prev.map(m => m.id === id ? { ...m, ...newMapping } : m))
     const deleteClassMapping = (id) => setClassMappings(prev => prev.filter(m => m.id !== id))
 
     return (
@@ -339,7 +340,7 @@ export function AppProvider({ children }) {
             admin, loginAdmin, logoutAdmin,
             circulars, addCircular, deleteCircular,
             achievements, addAchievement, deleteAchievement,
-            classMappings, addClassMapping, deleteClassMapping
+            classMappings, addClassMapping, updateClassMapping, deleteClassMapping
         }}>
             {children}
         </AppContext.Provider>

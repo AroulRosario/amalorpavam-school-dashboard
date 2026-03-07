@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { motion } from 'framer-motion'
-import { Layers, Users, Plus, Trash2, CheckCircle, MapPin } from 'lucide-react'
+import { Layers, Users, Plus, Trash2, CheckCircle, MapPin, UploadCloud } from 'lucide-react'
 
 export default function ClassManager() {
-    const { classMappings, addClassMapping, deleteClassMapping, teachers, addToast } = useApp()
+    const { classMappings, addClassMapping, updateClassMapping, deleteClassMapping, teachers, addToast } = useApp()
+    const fileInputRef = useRef(null)
 
     // Form state
     const [standard, setStandard] = useState('X')
@@ -12,7 +13,6 @@ export default function ClassManager() {
     const [teacherId, setTeacherId] = useState('')
 
     const standards = ['LKG', 'UKG', ...Array.from({ length: 12 }, (_, i) => `${i + 1}`).map(n => {
-        // Convert to Roman Numerals for 1-12
         const roman = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X', 11: 'XI', 12: 'XII' }
         return roman[n]
     })]
@@ -23,19 +23,59 @@ export default function ClassManager() {
         if (!standard || !section || !teacherId) return
 
         const className = `${standard}-${section}`
-        if (classMappings.find(m => m.class === className)) {
-            addToast(`${className} already exists!`, 'error')
-            return
-        }
+        const existing = classMappings.find(m => m.class === className)
 
-        addClassMapping({
-            class: className,
-            standard,
-            section,
-            teacherId: Number(teacherId)
-        })
-        addToast(`Class ${className} mapped successfully.`, 'success')
-        setTeacherId('') // reset
+        if (existing) {
+            updateClassMapping(existing.id, { teacherId: Number(teacherId) })
+            addToast(`Class ${className} updated successfully.`, 'success')
+        } else {
+            addClassMapping({ class: className, standard, section, teacherId: Number(teacherId) })
+            addToast(`Class ${className} mapped successfully.`, 'success')
+        }
+        setTeacherId('')
+    }
+
+    const handleCsvUpload = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = (evt) => {
+            const lines = evt.target.result.split(/\r?\n/).filter(l => l.trim())
+            let added = 0, updated = 0, errors = 0
+
+            // Skip header starting from line 1
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(',').map(s => s.replace(/["']/g, '').trim())
+                // Expected format: Class (e.g. XII-A), Teacher Email
+                if (parts.length >= 2) {
+                    const cls = parts[0]
+                    const email = parts[1]
+                    const teacher = teachers.find(t => t.email.toLowerCase() === email.toLowerCase())
+
+                    if (!teacher) {
+                        errors++
+                        continue
+                    }
+
+                    const existing = classMappings.find(m => m.class === cls)
+                    if (existing) {
+                        updateClassMapping(existing.id, { teacherId: teacher.id })
+                        updated++
+                    } else {
+                        const [std, sec] = cls.split('-')
+                        if (std && sec) {
+                            addClassMapping({ class: cls, standard: std, section: sec, teacherId: teacher.id })
+                            added++
+                        } else {
+                            errors++
+                        }
+                    }
+                }
+            }
+            addToast(`CSV Processed: ${added} added, ${updated} updated, ${errors} errors.`, added + updated > 0 ? 'success' : 'error')
+        }
+        reader.readAsText(file)
+        e.target.value = ''
     }
 
     return (
@@ -44,6 +84,12 @@ export default function ClassManager() {
                 <div>
                     <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 24, fontWeight: 800, color: '#0A2463', margin: 0 }}>Class Management</h2>
                     <p style={{ color: '#64748B', fontSize: 14, marginTop: 4 }}>Map standards and sections to class teachers for automatic roster routing.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    <input type="file" accept=".csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleCsvUpload} />
+                    <button className="btn btn-outline" onClick={() => fileInputRef.current?.click()} style={{ background: 'white' }}>
+                        <UploadCloud size={18} /> Bulk Upload CSV
+                    </button>
                 </div>
             </div>
 
