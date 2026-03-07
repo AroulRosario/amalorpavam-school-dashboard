@@ -22,6 +22,7 @@ const navGroups = [
             { id: 'homework', icon: CheckSquare, label: 'Homework Manager' },
             { id: 'exams', icon: BookOpen, label: 'Exam Allotment' },
             { id: 'timetable', icon: Calendar, label: 'Timetable Manager' },
+            { id: 'class-mgr', icon: Layers, label: 'Class Management' },
             { id: 'circulars', icon: Bell, label: 'Circulars & Notices' },
             { id: 'achievements', icon: Award, label: 'Hall of Fame' },
         ]

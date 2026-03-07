@@ -14,6 +14,7 @@ const TIMETABLE_DB_KEY = 'amal_timetable_db'
 const TEACHER_PERMS_DB_KEY = 'amal_teacher_perms_db'
 const CIRCULARS_DB_KEY = 'amal_circulars_db'
 const ACHIEVEMENTS_DB_KEY = 'amal_achievements_db'
+const CLASS_MAPPINGS_DB_KEY = 'amal_class_mappings_db'
 
 // Default permission set for new teachers
 const DEFAULT_PERMS = { homework: true, markEntry: true, attendance: true, contentUpload: false, timetableView: true, studentPerformance: true }
@@ -195,6 +196,14 @@ export function AppProvider({ children }) {
     })
     useEffect(() => { localStorage.setItem(ACHIEVEMENTS_DB_KEY, JSON.stringify(achievements)) }, [achievements])
 
+    // ── Class Mappings ───────────────────────────
+    const [classMappings, setClassMappings] = useState(() => {
+        const saved = localStorage.getItem(CLASS_MAPPINGS_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return []
+    })
+    useEffect(() => { localStorage.setItem(CLASS_MAPPINGS_DB_KEY, JSON.stringify(classMappings)) }, [classMappings])
+
     // ── App Config ───────────────────────────────
     const [appConfig, setAppConfig] = useState(() => {
         const saved = localStorage.getItem(APP_CONFIG_DB_KEY)
@@ -221,6 +230,7 @@ export function AppProvider({ children }) {
                     case NEWS_DB_KEY: setNews(parsed); break
                     case LIVE_CLASSES_DB_KEY: setLiveClasses(parsed); break
                     case APP_CONFIG_DB_KEY: setAppConfig(parsed); break
+                    case CLASS_MAPPINGS_DB_KEY: setClassMappings(parsed); break
                 }
             } catch (err) { }
         }
@@ -301,6 +311,10 @@ export function AppProvider({ children }) {
     const addAchievement = (a) => setAchievements(prev => [{ ...a, id: Date.now() }, ...prev])
     const deleteAchievement = (id) => setAchievements(prev => prev.filter(a => a.id !== id))
 
+    // Class Mapping Actions
+    const addClassMapping = (mapping) => setClassMappings(prev => [...prev, { ...mapping, id: Date.now() }])
+    const deleteClassMapping = (id) => setClassMappings(prev => prev.filter(m => m.id !== id))
+
     return (
         <AppContext.Provider value={{
             students, addStudent, deleteStudent, updateStudent, importStudents,
@@ -324,7 +338,8 @@ export function AppProvider({ children }) {
             chartPeriod, setChartPeriod,
             admin, loginAdmin, logoutAdmin,
             circulars, addCircular, deleteCircular,
-            achievements, addAchievement, deleteAchievement
+            achievements, addAchievement, deleteAchievement,
+            classMappings, addClassMapping, deleteClassMapping
         }}>
             {children}
         </AppContext.Provider>

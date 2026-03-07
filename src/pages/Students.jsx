@@ -130,7 +130,21 @@ export default function StudentsPage() {
                     <div style={{ fontWeight: 700, fontSize: 14, color: '#0A2463' }}>
                         Student List <span style={{ color: '#94A3B8', fontWeight: 400 }}>({filtered.length})</span>
                     </div>
-                    <button className="btn btn-outline btn-sm" onClick={() => addToast('Export CSV downloading…', 'info')}>
+                    <button className="btn btn-outline btn-sm" onClick={() => {
+                        if (filtered.length === 0) return addToast('No records to export.', 'warning')
+                        const headers = ["Name", "Class", "Roll", "Email", "Phone", "Gender", "Average", "Attendance", "Fee_Status"]
+                        const rows = filtered.map(s => [
+                            `"${s.name}"`, `"${s.class}"`, `"${s.roll}"`, `"${s.email}"`, `"${s.phone || ''}"`, `"${s.gender || ''}"`, s.avg, s.attendance, `"${s.fee}"`
+                        ].join(','))
+                        const csvContent = [headers.join(','), ...rows].join('\n')
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `student_roster_${new Date().toISOString().split('T')[0]}.csv`
+                        a.click()
+                        addToast('Roster exported successfully!', 'success')
+                    }}>
                         ⬇ Export CSV
                     </button>
                 </div>

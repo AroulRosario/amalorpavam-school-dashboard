@@ -20,6 +20,7 @@ import ModuleAwaiting from './pages/ModuleAwaiting'
 import ExamAllotment from './pages/ExamAllotment'
 import TimetableManager from './pages/TimetableManager'
 import TeacherManager from './pages/TeacherManager'
+import ClassManager from './pages/ClassManager'
 
 // Mobile Pages
 import MobileHome from './pages/MobileHome'
@@ -101,6 +102,7 @@ const moduleCards = [
     { icon: Smartphone, color: '#6366F1', bg: '#EEF2FF', title: 'Student App Manager', desc: 'Control News Feed & Live Classes', tag: 'Advanced', modal: null, page: 'studentAppMgr' },
     { icon: CheckSquare, color: '#10B981', bg: '#D1FAE5', title: 'Homework Manager', desc: 'Assign to individual students', tag: 'New', modal: null, page: 'homework' },
     { icon: UserCog, color: '#8B5CF6', bg: '#EDE9FE', title: 'Teacher Manager', desc: 'Staff CRUD · Permissions · Mapping', tag: 'Core', modal: null, page: 'teacher-mgr' },
+    { icon: Layers, color: '#10B981', bg: '#D1FAE5', title: 'Class Management', desc: 'Map Teachers to Sections', tag: 'Core', modal: null, page: 'class-mgr' },
     { icon: Calendar, color: '#0EA5E9', bg: '#E0F2FE', title: 'Timetable Manager', desc: 'Class-wise LKG–12 schedules', tag: 'New', modal: null, page: 'timetable' },
     { icon: ClipboardCheck, color: '#F59E0B', bg: '#FEF3C7', title: 'Exam Allotment', desc: 'Assign exams to teachers', tag: 'Active', modal: null, page: 'exams' },
     { icon: Bell, color: '#1E50E2', bg: '#E8EFFD', title: 'Circular Distribution', desc: 'Send & track school circulars', tag: '3 New', modal: null, page: 'circulars' },
@@ -479,6 +481,7 @@ export default function App() {
         homework: <HomeworkAdmin />,
         exams: <ExamAllotment />,
         'teacher-mgr': <TeacherManager />,
+        'class-mgr': <ClassManager />,
         timetable: <TimetableManager />,
         'student-view': <StudentView />,
         'teacher-view': <TeacherView />,

@@ -14,6 +14,11 @@ export default function UserManagement() {
     const [searchTerm, setSearchTerm] = useState('')
     const [classFilter, setClassFilter] = useState('All')
 
+    // Modal State
+    const [showModal, setShowModal] = useState(false)
+    const [editUser, setEditUser] = useState(null)
+    const [formData, setFormData] = useState({ name: '', email: '', phone: '', role: '' })
+
     const admins = [
         { id: 'admin1', name: 'Fr. Joseph A.', email: 'admin@amal.edu', role: 'Super Admin', active: true, phone: '9840001122' },
         { id: 'admin2', name: 'Mrs. Selvi R.', email: 'selvi@amal.edu', role: 'Academic Coordinator', active: true, phone: '9840001123' },
@@ -52,12 +57,10 @@ export default function UserManagement() {
                         <ShieldCheck size={18} /> Permissions
                     </button>
                     <button className="btn btn-primary" onClick={() => {
-                        if (activeTab === 'teachers') {
-                            const name = prompt('Teacher Name:')
-                            const email = prompt('Email:')
-                            if (name && email) addTeacher({ name, email, subjects: [], classes: [] })
-                        } else if (activeTab === 'students') {
-                            openModal('addStudent')
+                        if (activeTab === 'teachers' || activeTab === 'students') {
+                            setEditUser(null)
+                            setFormData({ name: '', email: '', phone: '', role: activeTab === 'teachers' ? 'Teacher' : 'Student' })
+                            setShowModal(true)
                         } else {
                             addToast('Admin creation restricted to Super Admin only.', 'info')
                         }
@@ -161,15 +164,25 @@ export default function UserManagement() {
                         </div>
 
                         <div style={{ display: 'flex', gap: 8 }}>
-                            <button className="btn btn-ghost btn-sm" onClick={() => addToast('Opening edit view...', 'info')}><Edit3 size={16} /></button>
+                            <button className="btn btn-ghost btn-sm" onClick={() => {
+                                setEditUser(u)
+                                setFormData({ name: u.name, email: u.email, phone: u.phone || '', role: activeTab === 'teachers' ? 'Teacher' : activeTab === 'students' ? 'Student' : 'Admin' })
+                                setShowModal(true)
+                            }}><Edit3 size={16} /></button>
+
                             <button className="btn btn-ghost btn-sm" style={{ color: '#EF4444' }} onClick={() => {
-                                if (confirm('Delete user?')) {
-                                    if (activeTab === 'teachers') deleteTeacher(u.id)
-                                    else if (activeTab === 'students') deleteStudent(u.id)
-                                    else addToast('Cannot delete system admins.', 'error')
+                                if (confirm(`Remove ${u.name} from the system?`)) {
+                                    if (activeTab === 'teachers') {
+                                        deleteTeacher(u.id)
+                                        addToast('Teacher removed.', 'info')
+                                    } else if (activeTab === 'students') {
+                                        deleteStudent(u.id)
+                                        addToast('Student removed.', 'info')
+                                    } else {
+                                        addToast('Cannot delete system admins.', 'error')
+                                    }
                                 }
                             }}><Trash2 size={16} /></button>
-                            <button className="btn btn-ghost btn-sm"><MoreVertical size={16} /></button>
                         </div>
                     </motion.div>
                 ))}
@@ -179,6 +192,51 @@ export default function UserManagement() {
                     </div>
                 )}
             </div>
+
+            {/* Add / Edit Modal */}
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-overlay">
+                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="modal-content" style={{ maxWidth: 450 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+                                <h3 style={{ margin: 0 }}>{editUser ? 'Edit User' : `Add New ${activeTab === 'teachers' ? 'Staff' : 'Student'}`}</h3>
+                                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none' }}><X size={20} /></button>
+                            </div>
+                            <form onSubmit={(e) => {
+                                e.preventDefault()
+                                if (!formData.name || !formData.email) return addToast('Name and email required', 'error')
+
+                                if (editUser) {
+                                    if (activeTab === 'teachers') updateTeacher(editUser.id, { ...editUser, ...formData })
+                                    if (activeTab === 'students') updateStudent(editUser.id, { ...editUser, ...formData })
+                                    addToast('User updated successfully', 'success')
+                                } else {
+                                    if (activeTab === 'teachers') addTeacher({ ...formData, subjects: [], classes: [], active: true })
+                                    addToast('User added successfully', 'success')
+                                }
+                                setShowModal(false)
+                            }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Full Name</label>
+                                    <input className="form-input" placeholder="e.g. John Doe" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Email Address</label>
+                                    <input type="email" className="form-input" placeholder="john@amal.edu" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Phone (Optional)</label>
+                                    <input type="tel" className="form-input" placeholder="+91..." value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                                </div>
+
+                                <button type="submit" className="btn btn-primary" style={{ marginTop: 8 }}>
+                                    {editUser ? 'Save Changes' : 'Create User'}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

@@ -4,7 +4,7 @@ import { Database, Upload, FileText, CheckCircle, AlertCircle, X, Download, Shie
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function BulkImport() {
-    const { importStudents, addToast } = useApp()
+    const { importStudents, addToast, classMappings } = useApp()
     const [dragging, setDragging] = useState(false)
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState([])
@@ -22,13 +22,18 @@ export default function BulkImport() {
             const lines = e.target.result.split('\n')
             const data = lines.slice(1).filter(l => l.trim()).map(line => {
                 const parts = line.split(',')
+                const studentClass = parts[1]?.trim() || 'XII-A'
+                // Lookup mapping for this class
+                const mapping = classMappings.find(m => m.class === studentClass)
+
                 return {
                     name: parts[0]?.trim(),
-                    class: parts[1]?.trim() || 'XII-A',
+                    class: studentClass,
                     roll: parts[2]?.trim() || '00',
                     email: parts[3]?.trim() || '',
                     phone: parts[4]?.trim() || '',
-                    avg: parseInt(parts[5]) || 70
+                    avg: parseInt(parts[5]) || 70,
+                    teacherId: mapping ? mapping.teacherId : null // Auto assign
                 }
             })
             setPreview(data)
