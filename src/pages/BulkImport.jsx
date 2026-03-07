@@ -33,7 +33,7 @@ export default function BulkImport() {
                     email: parts[3]?.trim() || '',
                     phone: parts[4]?.trim() || '',
                     avg: parseInt(parts[5]) || 70,
-                    teacherId: mapping ? mapping.teacherId : null // Auto assign
+                    teacherId: mapping ? (mapping.teacherIds?.[0] ?? null) : null // Auto assign primary teacher
                 }
             })
             setPreview(data)

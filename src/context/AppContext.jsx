@@ -311,8 +311,20 @@ export function AppProvider({ children }) {
     const addAchievement = (a) => setAchievements(prev => [{ ...a, id: Date.now() }, ...prev])
     const deleteAchievement = (id) => setAchievements(prev => prev.filter(a => a.id !== id))
 
-    // Class Mapping Actions
-    const addClassMapping = (mapping) => setClassMappings(prev => [...prev, { ...mapping, id: Date.now() }])
+    // Class Mapping Actions — multi-teacher model (teacherIds is an array)
+    const addClassMapping = (mapping) => {
+        const teacherIds = mapping.teacherIds || (mapping.teacherId ? [Number(mapping.teacherId)] : [])
+        setClassMappings(prev => [...prev, { ...mapping, id: Date.now(), teacherIds, teacherId: undefined }])
+    }
+    // Add or remove a single teacher from an existing class mapping
+    const toggleTeacherInClass = (classId, teacherId) => {
+        setClassMappings(prev => prev.map(m => {
+            if (m.id !== classId) return m
+            const tId = Number(teacherId)
+            const already = (m.teacherIds || []).includes(tId)
+            return { ...m, teacherIds: already ? m.teacherIds.filter(id => id !== tId) : [...(m.teacherIds || []), tId] }
+        }))
+    }
     const updateClassMapping = (id, newMapping) => setClassMappings(prev => prev.map(m => m.id === id ? { ...m, ...newMapping } : m))
     const deleteClassMapping = (id) => setClassMappings(prev => prev.filter(m => m.id !== id))
 
@@ -340,7 +352,7 @@ export function AppProvider({ children }) {
             admin, loginAdmin, logoutAdmin,
             circulars, addCircular, deleteCircular,
             achievements, addAchievement, deleteAchievement,
-            classMappings, addClassMapping, updateClassMapping, deleteClassMapping
+            classMappings, addClassMapping, toggleTeacherInClass, updateClassMapping, deleteClassMapping
         }}>
             {children}
         </AppContext.Provider>

@@ -41,7 +41,7 @@ export default function Toast() {
                     minWidth: 260,
                 }}>
                     {iconMap[t.type]}
-                    <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{t.message}</span>
+                    <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: '#1e293b' }}>{t.msg}</span>
                     <button onClick={() => { }}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 2 }}>
                         <X size={14} />
