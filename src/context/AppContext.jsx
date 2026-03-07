@@ -15,6 +15,10 @@ const TEACHER_PERMS_DB_KEY = 'amal_teacher_perms_db'
 const CIRCULARS_DB_KEY = 'amal_circulars_db'
 const ACHIEVEMENTS_DB_KEY = 'amal_achievements_db'
 const CLASS_MAPPINGS_DB_KEY = 'amal_class_mappings_db'
+const ATTENDANCE_DB_KEY = 'amal_attendance_db'
+const SYLLABUS_DB_KEY = 'amal_syllabus_db'
+const NOTIFICATIONS_DB_KEY = 'amal_notifications_db'
+const INVENTORY_DB_KEY = 'amal_inventory_db'
 
 // Default permission set for new teachers
 const DEFAULT_PERMS = { homework: true, markEntry: true, attendance: true, contentUpload: false, timetableView: true, studentPerformance: true }
@@ -116,11 +120,7 @@ export function AppProvider({ children }) {
         { id: 2, name: 'Ms. Sunitha (Teacher)', date: '2026-03-05', time: '11:45', type: 'Staff Review', status: 'Pending' },
     ])
 
-    const [inventory, setInventory] = useState([
-        { id: 1, name: 'School Tie', stock: 45, price: 150, min: 20 },
-        { id: 2, name: 'Notebook (Long size)', stock: 120, price: 65, min: 50 },
-        { id: 3, name: 'White Shirt (Size 36)', stock: 12, price: 450, min: 15 },
-    ])
+
 
     const [content, setContent] = useState([
         { id: 1, title: 'Integration Basics', sub: 'Mathematics', type: 'PDF', date: 'Feb 20', teacher: 'Ms. Anitha K.' },
@@ -140,7 +140,7 @@ export function AppProvider({ children }) {
     })
     useEffect(() => { localStorage.setItem(HOMEWORK_DB_KEY, JSON.stringify(homework)) }, [homework])
 
-    const [attendance, setAttendance] = useState({ 'XII-A': { '1': true, '2': false, '3': true, '4': true } })
+
     const [gradebook, setGradebook] = useState({})
 
     // ── Exams ────────────────────────────────────
@@ -204,6 +204,31 @@ export function AppProvider({ children }) {
     })
     useEffect(() => { localStorage.setItem(CLASS_MAPPINGS_DB_KEY, JSON.stringify(classMappings)) }, [classMappings])
 
+    // ── Attendance ───────────────────────────────
+    const [attendance, setAttendance] = useState(() => JSON.parse(localStorage.getItem(ATTENDANCE_DB_KEY)) || {})
+    useEffect(() => { localStorage.setItem(ATTENDANCE_DB_KEY, JSON.stringify(attendance)) }, [attendance])
+
+    // ── Syllabus ─────────────────────────────────
+    const [syllabus, setSyllabus] = useState(() => JSON.parse(localStorage.getItem(SYLLABUS_DB_KEY)) || [])
+    useEffect(() => { localStorage.setItem(SYLLABUS_DB_KEY, JSON.stringify(syllabus)) }, [syllabus])
+
+    // ── Notifications ───────────────────────────
+    const [notifications, setNotifications] = useState(() => JSON.parse(localStorage.getItem(NOTIFICATIONS_DB_KEY)) || [])
+    useEffect(() => { localStorage.setItem(NOTIFICATIONS_DB_KEY, JSON.stringify(notifications)) }, [notifications])
+
+    // ── Inventory ────────────────────────────────
+    const [inventory, setInventory] = useState(() => {
+        const saved = localStorage.getItem(INVENTORY_DB_KEY)
+        if (saved) return JSON.parse(saved)
+        return [
+            { id: 1, name: 'Boys Blazer (Navy)', category: 'Uniform', stock: 120, price: 1850, orders: 45, icon: '🧥' },
+            { id: 2, name: 'Girls Tunic (Grey)', category: 'Uniform', stock: 85, price: 1200, orders: 32, icon: '👗' },
+            { id: 3, name: 'Mathematics Vol 1', category: 'Books', stock: 240, price: 450, orders: 110, icon: '📚' },
+            { id: 4, name: 'Chemistry Record', category: 'Stationery', stock: 40, price: 120, orders: 85, icon: '📔' },
+        ]
+    })
+    useEffect(() => { localStorage.setItem(INVENTORY_DB_KEY, JSON.stringify(inventory)) }, [inventory])
+
     // ── App Config ───────────────────────────────
     const [appConfig, setAppConfig] = useState(() => {
         const saved = localStorage.getItem(APP_CONFIG_DB_KEY)
@@ -231,6 +256,10 @@ export function AppProvider({ children }) {
                     case LIVE_CLASSES_DB_KEY: setLiveClasses(parsed); break
                     case APP_CONFIG_DB_KEY: setAppConfig(parsed); break
                     case CLASS_MAPPINGS_DB_KEY: setClassMappings(parsed); break
+                    case ATTENDANCE_DB_KEY: setAttendance(parsed); break
+                    case SYLLABUS_DB_KEY: setSyllabus(parsed); break
+                    case NOTIFICATIONS_DB_KEY: setNotifications(parsed); break
+                    case INVENTORY_DB_KEY: setInventory(parsed); break
                 }
             } catch (err) { }
         }
@@ -311,22 +340,49 @@ export function AppProvider({ children }) {
     const addAchievement = (a) => setAchievements(prev => [{ ...a, id: Date.now() }, ...prev])
     const deleteAchievement = (id) => setAchievements(prev => prev.filter(a => a.id !== id))
 
-    // Class Mapping Actions — multi-teacher model (teacherIds is an array)
+    // Class Mapping Actions — Model V3 (Subjects mapping)
     const addClassMapping = (mapping) => {
-        const teacherIds = mapping.teacherIds || (mapping.teacherId ? [Number(mapping.teacherId)] : [])
-        setClassMappings(prev => [...prev, { ...mapping, id: Date.now(), teacherIds, teacherId: undefined }])
-    }
-    // Add or remove a single teacher from an existing class mapping
-    const toggleTeacherInClass = (classId, teacherId) => {
-        setClassMappings(prev => prev.map(m => {
-            if (m.id !== classId) return m
-            const tId = Number(teacherId)
-            const already = (m.teacherIds || []).includes(tId)
-            return { ...m, teacherIds: already ? m.teacherIds.filter(id => id !== tId) : [...(m.teacherIds || []), tId] }
-        }))
+        const subjects = mapping.subjects || []
+        setClassMappings(prev => [...prev, { ...mapping, id: Date.now(), subjects }])
     }
     const updateClassMapping = (id, newMapping) => setClassMappings(prev => prev.map(m => m.id === id ? { ...m, ...newMapping } : m))
+    const addSubjectToClass = (classId, subjectName, teacherId) => {
+        setClassMappings(prev => prev.map(m => {
+            if (m.id !== classId) return m
+            const subjects = [...(m.subjects || [])]
+            const existingIdx = subjects.findIndex(s => s.name.toLowerCase() === subjectName.toLowerCase())
+            if (existingIdx >= 0) subjects[existingIdx] = { name: subjectName, teacherId: Number(teacherId) }
+            else subjects.push({ name: subjectName, teacherId: Number(teacherId) })
+            return { ...m, subjects }
+        }))
+    }
     const deleteClassMapping = (id) => setClassMappings(prev => prev.filter(m => m.id !== id))
+
+    // Attendance Actions
+    const updateAttendance = (date, classId, studentRecords) => {
+        setAttendance(prev => ({ ...prev, [`${date}_${classId}`]: studentRecords }))
+    }
+
+    // Syllabus Actions
+    const updateSyllabus = (s) => {
+        setSyllabus(prev => {
+            const idx = prev.findIndex(item => item.class === s.class && item.subject === s.subject && item.unitId === s.unitId)
+            if (idx >= 0) {
+                const updated = [...prev]
+                updated[idx] = { ...updated[idx], ...s }
+                return updated
+            }
+            return [...prev, { ...s, id: Date.now() }]
+        })
+    }
+
+    // Notification Actions
+    const addNotification = (n) => setNotifications(prev => [{ ...n, id: Date.now(), read: false, time: new Date().toISOString() }, ...prev])
+
+    // Inventory Actions
+    const updateInventoryStock = (id, change) => {
+        setInventory(prev => prev.map(item => item.id === id ? { ...item, stock: Math.max(0, item.stock + change) } : item))
+    }
 
     return (
         <AppContext.Provider value={{
@@ -352,7 +408,9 @@ export function AppProvider({ children }) {
             admin, loginAdmin, logoutAdmin,
             circulars, addCircular, deleteCircular,
             achievements, addAchievement, deleteAchievement,
-            classMappings, addClassMapping, toggleTeacherInClass, updateClassMapping, deleteClassMapping
+            syllabus, updateSyllabus,
+            notifications, addNotification,
+            classMappings, addClassMapping, updateClassMapping, addSubjectToClass, deleteClassMapping
         }}>
             {children}
         </AppContext.Provider>

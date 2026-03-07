@@ -21,6 +21,17 @@ export default function FeePage() {
         { label: 'Pending', val: Math.round((pending / total) * 100), col: '#F59E0B' },
     ]
 
+    const handleRemind = (student) => {
+        addNotification({
+            userId: student.id,
+            userRole: 'student',
+            type: 'fee',
+            title: 'Fee Payment Reminder',
+            msg: `Dear ${student.name}, your Term 3 fees (₹4,200) are pending. Please clear them at the earliest.`
+        })
+        addToast(`Official reminder sent to ${student.name}!`, 'success')
+    }
+
     return (
         <div className="dashboard-body">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -87,7 +98,7 @@ export default function FeePage() {
                                     <td>
                                         {s.fee !== 'Paid' ? (
                                             <button className="btn btn-sm" style={{ background: '#1E50E2', color: 'white', border: 'none' }}
-                                                onClick={() => addToast(`Reminder sent to ${s.name}!`, 'success')}>
+                                                onClick={() => handleRemind(s)}>
                                                 <Send size={11} /> Remind
                                             </button>
                                         ) : (
