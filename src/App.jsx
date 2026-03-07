@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import Toast from './components/Toast'

@@ -203,6 +203,31 @@ export function AppProvider({ children }) {
     })
     useEffect(() => { localStorage.setItem(APP_CONFIG_DB_KEY, JSON.stringify(appConfig)) }, [appConfig])
 
+    // ── Cross-App Sync (Instant Updates) ─────────
+    useEffect(() => {
+        const sync = (e) => {
+            if (!e.newValue) return
+            try {
+                const parsed = JSON.parse(e.newValue)
+                switch (e.key) {
+                    case STUDENT_DB_KEY: setStudents(parsed); break
+                    case TEACHER_DB_KEY: setTeachers(parsed); break
+                    case HOMEWORK_DB_KEY: setHomework(parsed); break
+                    case EXAM_DB_KEY: setExams(parsed); break
+                    case TIMETABLE_DB_KEY: setTimetable(parsed); break
+                    case TEACHER_PERMS_DB_KEY: setTeacherPerms(parsed); break
+                    case CIRCULARS_DB_KEY: setCirculars(parsed); break
+                    case ACHIEVEMENTS_DB_KEY: setAchievements(parsed); break
+                    case NEWS_DB_KEY: setNews(parsed); break
+                    case LIVE_CLASSES_DB_KEY: setLiveClasses(parsed); break
+                    case APP_CONFIG_DB_KEY: setAppConfig(parsed); break
+                }
+            } catch (err) { }
+        }
+        window.addEventListener('storage', sync)
+        return () => window.removeEventListener('storage', sync)
+    }, [])
+
     // ── UI State ─────────────────────────────────
     const [activePage, setActivePage] = useState('dashboard')
     const [toasts, setToasts] = useState([])
